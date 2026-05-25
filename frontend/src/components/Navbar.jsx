@@ -4,11 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { navLinks } from '../data/site';
 import ChatCTA from './ChatCTA';
+import UserMenu from './UserMenu';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { isAuthenticated, isInitializing } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -17,7 +20,6 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close mobile menu on route change.
   useEffect(() => { setOpen(false); }, [location.pathname]);
 
   return (
@@ -52,9 +54,7 @@ export default function Navbar() {
               className={({ isActive }) =>
                 [
                   'relative rounded-full px-3.5 py-2 text-sm tracking-tight transition-colors duration-300',
-                  isActive
-                    ? 'text-musper-green'
-                    : 'text-musper-ink/70 hover:text-musper-green',
+                  isActive ? 'text-musper-green' : 'text-musper-ink/70 hover:text-musper-green',
                 ].join(' ')
               }
             >
@@ -74,8 +74,30 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden lg:block">
-          <ChatCTA />
+        <div className="hidden items-center gap-3 lg:flex">
+          {isInitializing ? (
+            <div className="h-9 w-32 rounded-full bg-musper-cream-soft" />
+          ) : isAuthenticated ? (
+            <>
+              <ChatCTA />
+              <UserMenu />
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="text-sm font-medium text-musper-ink/80 transition-colors hover:text-musper-green"
+              >
+                Sign in
+              </Link>
+              <Link
+                to="/signup"
+                className="inline-flex items-center gap-2 rounded-full bg-musper-green px-5 py-2.5 text-sm font-medium text-musper-cream shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-musper-green-deep"
+              >
+                Create account
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -106,18 +128,47 @@ export default function Navbar() {
                   className={({ isActive }) =>
                     [
                       'flex items-center justify-between rounded-xl px-4 py-3 text-base transition-colors',
-                      isActive
-                        ? 'bg-musper-green text-musper-cream'
-                        : 'text-musper-ink hover:bg-musper-green-soft',
+                      isActive ? 'bg-musper-green text-musper-cream' : 'text-musper-ink hover:bg-musper-green-soft',
                     ].join(' ')
                   }
                 >
                   {link.label}
                 </NavLink>
               ))}
-              <div className="mt-2">
-                <ChatCTA />
-              </div>
+              <div className="my-2 h-px bg-musper-line" />
+              {isAuthenticated ? (
+                <>
+                  <NavLink
+                    to="/profile"
+                    className={({ isActive }) =>
+                      [
+                        'flex items-center justify-between rounded-xl px-4 py-3 text-base transition-colors',
+                        isActive ? 'bg-musper-green text-musper-cream' : 'text-musper-ink hover:bg-musper-green-soft',
+                      ].join(' ')
+                    }
+                  >
+                    Account
+                  </NavLink>
+                  <div className="mt-2">
+                    <ChatCTA />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="flex items-center justify-between rounded-xl px-4 py-3 text-base text-musper-ink hover:bg-musper-green-soft"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-musper-green px-5 py-3 text-sm font-medium text-musper-cream"
+                  >
+                    Create account
+                  </Link>
+                </>
+              )}
             </div>
           </motion.div>
         )}
