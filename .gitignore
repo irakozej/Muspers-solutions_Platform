@@ -1,0 +1,32 @@
+# --- OS / editor ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# --- env / secrets ---
+.env
+.env.local
+.env.*.local
+*.secret
+
+# --- Python / backend ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- Node / frontend ---
+node_modules/
+dist/
+.vite/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+
+# --- Docker volumes (host-side) ---
+.pgdata/
