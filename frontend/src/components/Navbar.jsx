@@ -1,21 +1,127 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X } from 'lucide-react';
+import { navLinks } from '../data/site';
+import ChatCTA from './ChatCTA';
 
 export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Close mobile menu on route change.
+  useEffect(() => { setOpen(false); }, [location.pathname]);
+
   return (
-    <header className="border-b border-black/5 bg-white/70 backdrop-blur">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="inline-block h-3 w-3 rounded-full bg-musper-orange" />
-          <span className="font-display text-lg font-semibold tracking-tightish text-musper-green">
-            Musper Solutions
+    <motion.header
+      initial={{ y: -24, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className={[
+        'sticky top-0 z-50 transition-all duration-500 ease-editorial',
+        scrolled
+          ? 'bg-musper-cream/85 backdrop-blur-md border-b border-musper-line'
+          : 'bg-transparent border-b border-transparent',
+      ].join(' ')}
+    >
+      <div className="container flex items-center justify-between py-4 lg:py-5">
+        <Link to="/" className="group flex items-center gap-3">
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-musper-green text-musper-cream font-display text-lg font-semibold">
+            M
+            <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-musper-orange" />
+          </span>
+          <span className="font-display text-lg font-semibold tracking-editorial text-musper-ink">
+            Musper <span className="text-musper-muted-soft">Solutions</span>
           </span>
         </Link>
-        <ul className="hidden items-center gap-8 text-sm text-musper-muted md:flex">
-          <li>Services</li>
-          <li>About</li>
-          <li>Contact</li>
-        </ul>
-      </nav>
-    </header>
+
+        <nav className="hidden items-center gap-1 lg:flex">
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.to === '/'}
+              className={({ isActive }) =>
+                [
+                  'relative rounded-full px-3.5 py-2 text-sm tracking-tight transition-colors duration-300',
+                  isActive
+                    ? 'text-musper-green'
+                    : 'text-musper-ink/70 hover:text-musper-green',
+                ].join(' ')
+              }
+            >
+              {({ isActive }) => (
+                <span className="flex items-center gap-1.5">
+                  {link.label}
+                  {isActive && (
+                    <motion.span
+                      layoutId="nav-dot"
+                      className="h-1.5 w-1.5 rounded-full bg-musper-orange"
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                </span>
+              )}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="hidden lg:block">
+          <ChatCTA />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-musper-line text-musper-ink lg:hidden"
+          aria-label="Toggle menu"
+        >
+          {open ? <X size={18} /> : <Menu size={18} />}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden border-t border-musper-line bg-musper-cream/95 backdrop-blur-md lg:hidden"
+          >
+            <div className="container flex flex-col gap-1 py-4">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  end={link.to === '/'}
+                  className={({ isActive }) =>
+                    [
+                      'flex items-center justify-between rounded-xl px-4 py-3 text-base transition-colors',
+                      isActive
+                        ? 'bg-musper-green text-musper-cream'
+                        : 'text-musper-ink hover:bg-musper-green-soft',
+                    ].join(' ')
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+              <div className="mt-2">
+                <ChatCTA />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   );
 }

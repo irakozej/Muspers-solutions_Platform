@@ -1,24 +1,81 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --musper-green: #1F4E3D;
+    --musper-orange: #E07B1F;
+    --musper-cream: #F5F2EA;
+    --musper-ink: #161616;
+  }
+
   html {
     font-family: theme('fontFamily.sans');
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-feature-settings: 'ss01', 'cv02', 'cv11';
   }
 
   body {
-    @apply bg-musper-bg text-musper-ink;
+    @apply bg-musper-cream text-musper-ink;
+    background-image:
+      radial-gradient(1200px 600px at 100% -200px, rgba(31, 78, 61, 0.06), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(224, 123, 31, 0.05), transparent 60%);
+    background-attachment: fixed;
   }
 
-  h1,
-  h2,
-  h3 {
-    @apply font-display tracking-tightish text-musper-ink;
+  ::selection {
+    background: var(--musper-green);
+    color: var(--musper-cream);
   }
+
+  /* Display headings — Fraunces with optical sizing */
+  .font-display {
+    font-optical-sizing: auto;
+    font-variation-settings: 'SOFT' 50, 'opsz' 144;
+  }
+
+  h1, h2, h3 {
+    @apply font-display tracking-editorial text-musper-ink;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-eyebrow uppercase font-medium text-musper-green;
+  }
+
+  .eyebrow::before {
+    content: '';
+    @apply inline-block h-1.5 w-1.5 rounded-full bg-musper-orange;
+  }
+
+  /* Editorial divider */
+  .rule {
+    @apply h-px w-full bg-musper-line;
+  }
+
+  /* Surface containers */
+  .surface-dark {
+    @apply bg-musper-green text-musper-cream;
+  }
+  .surface-dark h1, .surface-dark h2, .surface-dark h3 {
+    @apply text-musper-cream;
+  }
+
+  /* Decorative orange underline used under display words */
+  .ink-underline {
+    background-image: linear-gradient(transparent 75%, rgba(224, 123, 31, 0.32) 75%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
 }
