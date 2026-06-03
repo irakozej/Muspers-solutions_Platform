@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, User as UserIcon, LogOut, ShieldCheck } from 'lucide-react';
+import { ChevronDown, User as UserIcon, LogOut, ShieldCheck, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 function initialsOf(user) {
@@ -69,6 +69,13 @@ export default function UserMenu() {
               </span>
             </div>
             <div className="p-2">
+              <Link
+                to={isAdvisor ? '/advisor' : '/dashboard'}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-musper-ink transition-colors hover:bg-musper-green-soft"
+              >
+                <LayoutDashboard size={15} /> {isAdvisor ? 'Advisor dashboard' : 'My dashboard'}
+              </Link>
               <Link
                 to="/profile"
                 onClick={() => setOpen(false)}

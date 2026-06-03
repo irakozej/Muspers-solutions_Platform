@@ -221,29 +221,30 @@ export const founder = {
   ],
 };
 
-// Curated Unsplash photo URLs — relevant to African business, Kigali, advisory work.
-// All free-license, attribution-not-required on Unsplash.
+// Photo URLs — curated to depict Black / African professionals in business contexts.
+// All free-license on Unsplash, attribution not required.
+// To replace any with a real photo: drop the file in frontend/public/ and change
+// the URL here to '/your-filename.jpg' (same pattern as /penny.jpg).
 export const images = {
   heroPortrait:
-    'https://images.unsplash.com/photo-1573164574230-db1d5e960238?auto=format&fit=crop&w=1400&q=80',
-  kigaliSkyline:
-    'https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=1600&q=80',
-  workshop:
-    'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1400&q=80',
-  meeting:
-    'https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1400&q=80',
-  marketplace:
-    'https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?auto=format&fit=crop&w=1400&q=80',
-  founderPortrait:
-    'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1200&q=80',
-  team:
-    'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1600&q=80',
-  growth:
-    'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1400&q=80',
-  women:
     'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1400&q=80',
+  kigaliSkyline:
+    'https://images.unsplash.com/photo-1611348586804-61bf6c080437?auto=format&fit=crop&w=1600&q=80',
+  workshop:
+    'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=1400&q=80',
+  meeting:
+    'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1400&q=80',
+  marketplace:
+    'https://images.unsplash.com/photo-1597393353415-b3730f3719fe?auto=format&fit=crop&w=1400&q=80',
+  founderPortrait: '/penny.jpg',
+  team:
+    'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1600&q=80',
+  growth:
+    'https://images.unsplash.com/photo-1559523275-98fb3c56faf6?auto=format&fit=crop&w=1400&q=80',
+  women:
+    'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=1400&q=80',
   digital:
-    'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1400&q=80',
+    'https://images.unsplash.com/photo-1604881991720-f91add269bed?auto=format&fit=crop&w=1400&q=80',
 };
 
 export const navLinks = [
