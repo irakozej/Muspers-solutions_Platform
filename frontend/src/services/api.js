@@ -109,3 +109,53 @@ export const api = {
   submitContact: (data) =>
     request('/api/contact', { method: 'POST', body: data, withAuth: false }),
 };
+
+// Fetch a binary resource (e.g. a PDF) with the same auth + refresh treatment
+// as `request`. Returns { blob, filename } where `filename` is parsed from the
+// Content-Disposition header if present (otherwise null).
+export async function fetchAttachment(path, { fallbackName = 'download' } = {}) {
+  const doFetch = async () =>
+    fetch(`${API_BASE}${path}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+    });
+
+  let response = await doFetch();
+  if (response.status === 401) {
+    try {
+      await refreshAccessToken();
+      response = await doFetch();
+    } catch {
+      tokenStore.clear();
+      onUnauthenticated?.();
+    }
+  }
+
+  if (!response.ok) {
+    let payload = null;
+    try { payload = await response.json(); } catch { /* binary or empty */ }
+    throw asError(response, payload);
+  }
+
+  const blob = await response.blob();
+  const cd = response.headers.get('content-disposition') || '';
+  const match = cd.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+  const filename = match ? decodeURIComponent(match[1]) : fallbackName;
+  return { blob, filename };
+}
+
+// Triggers a browser download for a fetched attachment.
+export function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // Free the URL after the download starts.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}

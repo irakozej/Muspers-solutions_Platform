@@ -23,6 +23,8 @@ export default function ClientDetail() {
   const [noteText, setNoteText] = useState('');
   const [noteBusy, setNoteBusy] = useState(false);
   const [shareBusy, setShareBusy] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfError, setPdfError] = useState(null);
 
   const load = () =>
     advisorApi.clientDetail(id)
@@ -49,6 +51,17 @@ export default function ClientDetail() {
       await advisorApi.toggleShare(client.latest_report.id, !client.latest_report.is_shared);
       await load();
     } finally { setShareBusy(false); }
+  };
+
+  const onDownloadPdf = async () => {
+    if (!client?.latest_report) return;
+    setPdfBusy(true);
+    setPdfError(null);
+    try {
+      await advisorApi.downloadReportPdf(id);
+    } catch (e) {
+      setPdfError(e?.message || 'Could not generate the PDF.');
+    } finally { setPdfBusy(false); }
   };
 
   if (loading) return <p className="text-sm text-musper-muted">Loading client…</p>;
@@ -90,15 +103,22 @@ export default function ClientDetail() {
               </button>
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-full border border-musper-line bg-musper-cream-soft px-5 py-2.5 text-sm font-medium text-musper-ink/80 transition hover:border-musper-green/30"
-                title="PDF export coming in a later phase"
+                onClick={onDownloadPdf}
+                disabled={pdfBusy}
+                className="inline-flex items-center gap-2 rounded-full border border-musper-line bg-musper-cream-soft px-5 py-2.5 text-sm font-medium text-musper-ink/80 transition hover:border-musper-green/30 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <FileDown size={14} /> Export PDF
+                <FileDown size={14} /> {pdfBusy ? 'Generating PDF…' : 'Export PDF'}
               </button>
             </div>
           )
         }
       />
+
+      {pdfError && (
+        <div className="rounded-2xl border border-musper-orange/30 bg-musper-orange-soft px-4 py-3 text-sm text-musper-orange-dark">
+          {pdfError}
+        </div>
+      )}
 
       {/* Business snapshot */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

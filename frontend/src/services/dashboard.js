@@ -1,4 +1,10 @@
-import { request } from './api';
+import { request, fetchAttachment, triggerDownload } from './api';
+
+async function downloadPdf(path, fallback) {
+  const { blob, filename } = await fetchAttachment(path, { fallbackName: fallback });
+  triggerDownload(blob, filename);
+  return filename;
+}
 
 export const advisorApi = {
   stats: () => request('/api/advisor/stats'),
@@ -21,6 +27,8 @@ export const advisorApi = {
       body: { is_shared: isShared },
     }),
   analytics: () => request('/api/advisor/analytics'),
+  downloadReportPdf: (clientId) =>
+    downloadPdf(`/api/advisor/clients/${clientId}/report.pdf`, 'Musper_Diagnostic.pdf'),
 };
 
 export const clientApi = {
@@ -35,6 +43,8 @@ export const clientApi = {
     }),
   updateBusinessProfile: (payload) =>
     request('/api/client/profile', { method: 'PATCH', body: payload }),
+  downloadReportPdf: (reportId) =>
+    downloadPdf(`/api/client/reports/${reportId}/report.pdf`, 'Musper_Diagnostic.pdf'),
 };
 
 export const SCORE_BAND = {

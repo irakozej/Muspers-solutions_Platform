@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, require_csrf, require_role
@@ -18,6 +18,7 @@ from app.schemas.dashboard import (
     ShareUpdate,
 )
 from app.services import dashboard as svc
+from app.services import pdf_report
 
 router = APIRouter(prefix="/api/advisor", tags=["advisor"])
 
@@ -101,3 +102,31 @@ def analytics(
     db: Session = Depends(get_db),
 ) -> dict:
     return svc.collect_analytics(db)
+
+
+@router.get("/clients/{client_id}/report.pdf")
+def download_client_report_pdf(
+    client_id: uuid.UUID,
+    _: User = Depends(require_role(UserRole.advisor)),
+    db: Session = Depends(get_db),
+) -> Response:
+    detail = svc.client_detail(db, client_id)
+    if detail is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+    if not detail.get("latest_report"):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No completed report for this client yet.",
+        )
+
+    pdf_bytes, filename = pdf_report.render_report_pdf(
+        client=detail, report=detail["latest_report"]
+    )
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-store",
+        },
+    )

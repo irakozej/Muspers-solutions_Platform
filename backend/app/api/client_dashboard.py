@@ -1,15 +1,16 @@
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.deps import get_current_user, require_csrf, require_role
 from app.db.session import get_db
 from app.models.client import Client
 from app.models.diagnostic_session import DiagnosticSession
 from app.models.rating import Rating
+from app.models.report import Report
 from app.models.user import User, UserRole
 from app.schemas.dashboard import (
     ClientOverview,
@@ -21,6 +22,7 @@ from app.schemas.dashboard import (
     SessionSummary,
 )
 from app.services import dashboard as svc
+from app.services import pdf_report
 
 router = APIRouter(prefix="/api/client", tags=["client-dashboard"])
 
@@ -120,6 +122,51 @@ def rate_session(
     db.commit()
     db.refresh(rating)
     return rating
+
+
+@router.get("/reports/{report_id}/report.pdf")
+def download_shared_report_pdf(
+    report_id: uuid.UUID,
+    user: User = Depends(require_role(UserRole.client)),
+    db: Session = Depends(get_db),
+) -> Response:
+    client = _require_client_profile(db, user)
+
+    report = db.scalar(
+        select(Report)
+        .options(selectinload(Report.session).selectinload(DiagnosticSession.client))
+        .where(Report.id == report_id)
+    )
+    if report is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Report not found")
+
+    # Security checks: report must be shared AND belong to this client.
+    if not report.is_shared:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This report has not been shared with you yet.",
+        )
+    if not report.session or report.session.client_id != client.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This report does not belong to your account.",
+        )
+
+    detail = svc.client_detail(db, client.id)
+    if detail is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+
+    # Build the report dict in the same shape as latest_report.
+    report_dict = svc._report_payload(report, session_id=report.session_id)
+    pdf_bytes, filename = pdf_report.render_report_pdf(client=detail, report=report_dict)
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "no-store",
+        },
+    )
 
 
 @router.patch("/profile", response_model=ClientOverview)
