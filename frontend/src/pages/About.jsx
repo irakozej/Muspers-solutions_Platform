@@ -25,7 +25,7 @@ export default function About() {
           <Reveal delay={0.15}>
             <p className="mt-10 max-w-2xl text-lg leading-relaxed text-musper-muted text-pretty">
               Since {brand.founded}, Musper Solutions has worked alongside
-              founders, financial institutions, and development partners — building
+              founders, financial institutions, and development partners, building
               the strategies, training, and systems that turn ambition into
               durable, profitable, locally-owned businesses.
             </p>
@@ -134,7 +134,7 @@ export default function About() {
           <Reveal>
             <p className="eyebrow">Our values</p>
             <h2 className="mt-6 max-w-2xl font-display text-4xl leading-[1.05] tracking-editorial sm:text-5xl text-balance">
-              Four words we measure ourselves against — every project, every season.
+              Four words we measure ourselves against, every project, every season.
             </h2>
           </Reveal>
           <div className="mt-16 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
@@ -171,7 +171,7 @@ export default function About() {
               <Reveal delay={0.1}>
                 <p className="text-lg leading-relaxed text-musper-muted text-pretty">
                   Musper draws on a network of senior advisors, certified
-                  trainers, and sector specialists — assembled per engagement
+                  trainers, and sector specialists, assembled per engagement
                   to match the brief. We're building out the public team page;
                   in the meantime, the easiest way to meet us is to start a
                   conversation.
@@ -196,7 +196,7 @@ export default function About() {
                 The work is the proof. The numbers come after.
               </p>
               <p className="mt-6 text-sm uppercase tracking-eyebrow text-musper-muted">
-                — A line we keep coming back to.
+                A line we keep coming back to.
               </p>
             </div>
           </Reveal>

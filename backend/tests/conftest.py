@@ -1,4 +1,4 @@
-"""Test fixtures — uses a dedicated `musper_test` Postgres database.
+"""Test fixtures, uses a dedicated `musper_test` Postgres database.
 
 The dev database is left untouched. We drop+recreate the public schema once per
 test session, then truncate auth tables between tests.

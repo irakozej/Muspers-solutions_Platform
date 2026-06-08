@@ -39,7 +39,7 @@ export default function SessionTranscript() {
     } finally { setRateBusy(false); }
   };
 
-  if (loading) return <p className="text-sm text-musper-muted">Loading…</p>;
+  if (loading) return <p className="text-sm text-musper-muted">Loading...</p>;
   if (!data) return <p className="text-sm text-musper-muted">Session not found.</p>;
 
   return (
@@ -124,7 +124,7 @@ export default function SessionTranscript() {
                 disabled={rateBusy || !rateScore}
                 className="rounded-full bg-musper-orange px-6 py-3 text-sm font-medium text-musper-cream shadow-cta transition-all duration-300 hover:-translate-y-0.5 hover:bg-musper-orange-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {rateBusy ? 'Saving…' : data.rating ? 'Update rating' : 'Submit rating'}
+                {rateBusy ? 'Saving...' : data.rating ? 'Update rating' : 'Submit rating'}
               </button>
               {data.rating && (
                 <p className="text-xs text-musper-muted">

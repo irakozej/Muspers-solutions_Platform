@@ -87,7 +87,7 @@ export default function Profile() {
         <div className="mt-12 rounded-3xl border border-musper-green/20 bg-musper-green-soft px-6 py-5">
           <p className="text-xs uppercase tracking-eyebrow text-musper-green">Advisor</p>
           <p className="mt-2 text-base text-musper-ink/85">
-            You're signed in as a Musper advisor. The advisor dashboard lands in Phase 6 —
+            You're signed in as a Musper advisor. The advisor dashboard lands in Phase 6,
             for now your account is provisioned and your sessions are secure.
           </p>
         </div>
@@ -189,7 +189,7 @@ function SubmitButton({ children, busy }) {
       disabled={busy}
       className="inline-flex items-center gap-2 rounded-full bg-musper-green px-5 py-3 text-sm font-medium text-musper-cream shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-musper-green-deep disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {busy ? 'Saving…' : children}
+      {busy ? 'Saving...' : children}
     </button>
   );
 }

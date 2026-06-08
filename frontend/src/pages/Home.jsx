@@ -44,7 +44,7 @@ export default function Home() {
                 Musper Solutions is a Rwandan business development consultancy.
                 We partner with entrepreneurs, financial institutions, and
                 development partners to build the strategies, systems, and skills
-                that move businesses from idea to investment-ready — and beyond.
+                that move businesses from idea to investment-ready, and beyond.
               </p>
             </Reveal>
             <Reveal delay={0.25}>
@@ -68,7 +68,7 @@ export default function Home() {
               >
                 <img
                   src={images.workshop}
-                  alt="A working session — practical advisory in action"
+                  alt="A working session, practical advisory in action"
                   className="h-full w-full object-cover opacity-95"
                   loading="eager"
                 />
@@ -93,7 +93,7 @@ export default function Home() {
                 className="absolute -left-4 -bottom-6 max-w-[12rem] rounded-2xl border border-musper-line bg-musper-cream-soft px-5 py-4 shadow-soft lg:-left-12 lg:-bottom-8"
               >
                 <p className="font-display text-4xl font-medium leading-none tracking-editorial text-musper-green">
-                  300+
+                  2000+
                 </p>
                 <p className="mt-2 text-xs leading-snug text-musper-muted">
                   entrepreneurs trained across Rwanda and the region.
@@ -143,14 +143,14 @@ export default function Home() {
             <Reveal delay={0.1}>
               <p className="text-lg leading-relaxed text-musper-ink/85 text-pretty">
                 We combine practical business advisory, structured training
-                methodologies — including ILO's globally-recognised SIYB curriculum —
+                methodologies, including ILO's globally-recognised SIYB curriculum,
                 and ecosystem partnerships to deliver solutions that meet
                 entrepreneurs and institutions exactly where they are.
               </p>
               <p className="mt-6 text-lg leading-relaxed text-musper-muted text-pretty">
                 Founded by Penny Burabyo Musoni in {brand.founded}, Musper has grown into
                 a trusted partner for the institutions shaping Rwanda's
-                entrepreneurship ecosystem — and a steady hand for the founders
+                entrepreneurship ecosystem, and a steady hand for the founders
                 building inside it.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
@@ -245,9 +245,9 @@ export default function Home() {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="text-base leading-relaxed text-musper-cream/70 lg:max-w-md lg:justify-self-end">
-                At Musper, we design and implement initiatives that strengthen
-                entrepreneurship, empower businesses, and promote inclusive
-                economic growth — across Rwanda and the region.
+                At Musper, we design and run initiatives that strengthen
+                entrepreneurship, help businesses grow, and open up economic
+                opportunity across Rwanda and the region.
               </p>
             </Reveal>
           </div>
@@ -332,9 +332,9 @@ export default function Home() {
             <Reveal delay={0.1}>
               <figure>
                 <p className="font-display text-3xl leading-[1.18] tracking-editorial text-musper-ink/90 sm:text-[2.5rem] sm:leading-[1.15] text-balance">
-                  <span className="text-musper-orange">“</span>
+                  <span className="text-musper-orange">"</span>
                   {testimonials[1].quote}
-                  <span className="text-musper-orange">”</span>
+                  <span className="text-musper-orange">"</span>
                 </p>
                 <figcaption className="mt-8 flex items-center gap-3 text-sm text-musper-muted">
                   <span className="h-px w-10 bg-musper-orange" />

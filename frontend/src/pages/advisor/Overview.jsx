@@ -27,7 +27,7 @@ export default function AdvisorOverview() {
       <PageHeading
         eyebrow="Advisor workspace"
         title={`Welcome back, ${firstName}.`}
-        description="A snapshot of the practice today — active sessions, completed diagnostics, and what's waiting for your attention."
+        description="A snapshot of the practice today, active sessions, completed diagnostics, and what's waiting for your attention."
         action={
           <Link
             to="/advisor/clients"

@@ -15,7 +15,7 @@ export default function ClientProfile() {
   useEffect(() => {
     clientApi.me().then((d) => {
       setMe(d);
-      // Fetch sessions has no business fields — we need the raw client row.
+      // Fetch sessions has no business fields, we need the raw client row.
       // For now we keep the form prefill simple from /me.
       setForm({
         business_name: d.business_name || '',
@@ -51,7 +51,7 @@ export default function ClientProfile() {
       <PageHeading
         eyebrow="Profile"
         title="Your business + account."
-        description="Keep your business profile current — it's what Penny sees when she pulls up your case."
+        description="Keep your business profile current, it's what Penny sees when she pulls up your case."
       />
 
       <div className="grid gap-8 lg:grid-cols-2">
@@ -83,7 +83,7 @@ export default function ClientProfile() {
               disabled={status.state === 'submitting'}
               className="rounded-full bg-musper-green px-6 py-3 text-sm font-medium text-musper-cream shadow-soft hover:bg-musper-green-deep disabled:opacity-60"
             >
-              {status.state === 'submitting' ? 'Saving…' : 'Save business profile'}
+              {status.state === 'submitting' ? 'Saving...' : 'Save business profile'}
             </button>
           </form>
         </section>
@@ -93,7 +93,7 @@ export default function ClientProfile() {
           <p className="eyebrow">Personal</p>
           <h2 className="mt-3 font-display text-2xl tracking-editorial">Account details.</h2>
           <div className="mt-6 space-y-3 text-sm">
-            <Row label="Name" value={user?.full_name || '—'} />
+            <Row label="Name" value={user?.full_name || '-'} />
             <Row label="Email" value={user?.email} />
             <Row label="Role" value={user?.role} />
           </div>

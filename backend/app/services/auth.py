@@ -1,4 +1,4 @@
-"""All authentication business logic — kept thin and explicit.
+"""All authentication business logic, kept thin and explicit.
 
 Dev-mode behaviour:
   - Signups are auto-verified (is_verified=True) but still receive a verification
@@ -165,7 +165,7 @@ def revoke_refresh_token(db: Session, *, raw_token: str) -> None:
 # ───────────────────── password reset & verification ─────────────────────
 
 def issue_password_reset(db: Session, *, email: str) -> None:
-    """Always returns silently — never reveal whether an email exists."""
+    """Always returns silently, never reveal whether an email exists."""
     user = db.scalar(select(User).where(User.email == email.lower().strip()))
     if user is None:
         return
@@ -195,7 +195,7 @@ def consume_password_reset(db: Session, *, token: str, new_password: str) -> Use
     user.hashed_password = hash_password(new_password)
     user.reset_token_hash = None
     user.reset_token_expires_at = None
-    # Invalidate every active session — password change is a security event.
+    # Invalidate every active session, password change is a security event.
     for rt in user.refresh_tokens:
         if rt.revoked_at is None:
             rt.revoked_at = _now()
@@ -260,7 +260,7 @@ def change_password(
             detail="Current password is incorrect",
         )
     user.hashed_password = hash_password(new_password)
-    # Same as reset — revoke all other sessions.
+    # Same as reset, revoke all other sessions.
     for rt in user.refresh_tokens:
         if rt.revoked_at is None:
             rt.revoked_at = _now()

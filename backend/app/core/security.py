@@ -15,7 +15,7 @@ ALGO = "HS256"
 # ───────────────────── passwords ─────────────────────
 
 def hash_password(password: str) -> str:
-    # bcrypt accepts at most 72 bytes — silently truncating is industry standard here.
+    # bcrypt accepts at most 72 bytes, silently truncating is industry standard here.
     pw_bytes = password.encode("utf-8")[:72]
     return bcrypt.hashpw(pw_bytes, bcrypt.gensalt(rounds=12)).decode("utf-8")
 
@@ -59,7 +59,7 @@ def generate_opaque_token(nbytes: int = 48) -> str:
 
 
 def hash_opaque_token(token: str) -> str:
-    """Stable sha256 hex of an opaque token — what we store in the DB."""
+    """Stable sha256 hex of an opaque token, what we store in the DB."""
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 

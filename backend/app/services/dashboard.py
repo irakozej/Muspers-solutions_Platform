@@ -111,7 +111,7 @@ def collect_recent_activity(db: Session, *, limit: int) -> list[dict]:
             {
                 "kind": "rating_received",
                 "title": f"Rating from {bn}",
-                "description": f"{r.score} / 5 — {(r.feedback or '')[:80]}",
+                "description": f"{r.score} / 5, {(r.feedback or '')[:80]}",
                 "at": r.created_at,
                 "client_id": r.session.client_id if r.session else None,
                 "session_id": r.session_id,

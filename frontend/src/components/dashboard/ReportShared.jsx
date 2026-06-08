@@ -2,7 +2,7 @@
 import { SCORE_BAND, DOMAIN_LABELS } from '../../services/dashboard';
 
 export function ScoreBand({ band, score, size = 'md', label }) {
-  const meta = SCORE_BAND[band || '—'] || SCORE_BAND['—'];
+  const meta = SCORE_BAND[band || '-'] || SCORE_BAND['-'];
   const tones = {
     good: 'bg-musper-green text-musper-cream border-musper-green',
     mid: 'bg-musper-cream-soft text-musper-green border-musper-green/30',
@@ -302,7 +302,7 @@ export function StatusPill({ status }) {
 }
 
 export function formatRelative(value) {
-  if (!value) return '—';
+  if (!value) return '-';
   const d = typeof value === 'string' ? new Date(value) : value;
   const diff = Date.now() - d.getTime();
   const days = Math.floor(diff / 86400000);

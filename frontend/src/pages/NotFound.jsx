@@ -9,7 +9,7 @@ export default function NotFound() {
           The page you're looking for isn't here.
         </h1>
         <p className="mx-auto mt-8 max-w-xl text-lg text-musper-muted">
-          It may have moved, or it may have never existed. Either way — here are some better places to land.
+          It may have moved, or it may have never existed. Either way, here are some better places to land.
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-3">
           <Button to="/">Back to home</Button>

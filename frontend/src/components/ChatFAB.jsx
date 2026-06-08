@@ -3,7 +3,7 @@ import { useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 
-// Floating Action Button — site-wide bottom-right access to the (future) assistant.
+// Floating Action Button, site-wide bottom-right access to the (future) assistant.
 // Hides itself on the /diagnostic page (where the chat itself will live).
 export default function ChatFAB() {
   const location = useLocation();

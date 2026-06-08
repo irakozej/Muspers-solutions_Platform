@@ -122,7 +122,7 @@ def test_password_reset_end_to_end(client, db_session):
 def test_profile_update_requires_csrf(client):
     r = _register(client)
     token = r.json()["access_token"]
-    # No CSRF — should be rejected
+    # No CSRF, should be rejected
     r2 = client.patch(
         "/api/auth/me",
         headers={"Authorization": f"Bearer {token}"},

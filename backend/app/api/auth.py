@@ -152,7 +152,7 @@ def forgot_password(
     db: Session = Depends(get_db),
 ) -> DevTokenResponse:
     auth_service.issue_password_reset(db, email=payload.email)
-    # Always respond identically — never reveal whether the email exists.
+    # Always respond identically, never reveal whether the email exists.
     return DevTokenResponse(
         message="If an account exists for that email, a reset link has been sent.",
     )

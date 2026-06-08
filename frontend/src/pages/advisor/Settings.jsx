@@ -18,7 +18,7 @@ export default function AdvisorSettings() {
         <p className="eyebrow">Profile</p>
         <h2 className="mt-3 font-display text-2xl tracking-editorial">Account details.</h2>
         <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
-          <Row label="Name" value={user?.full_name || '—'} />
+          <Row label="Name" value={user?.full_name || '-'} />
           <Row label="Email" value={user?.email} />
           <Row label="Role" value={user?.role} />
           <Row label="Email verified" value={user?.is_verified ? 'Yes' : 'No'} />

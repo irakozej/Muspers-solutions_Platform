@@ -21,7 +21,7 @@ FINANCE_READINESS_WEIGHTS: dict[str, float] = {
 
 def band_for(score: float | int | None) -> str:
     if score is None:
-        return "—"
+        return "-"
     if score >= 80:
         return "A"
     if score >= 60:

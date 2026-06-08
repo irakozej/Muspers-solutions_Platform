@@ -21,7 +21,7 @@ export default function ClientReports() {
       />
 
       {loading ? (
-        <p className="text-sm text-musper-muted">Loading…</p>
+        <p className="text-sm text-musper-muted">Loading...</p>
       ) : reports.length === 0 ? (
         <EmptyState
           icon={FileText}

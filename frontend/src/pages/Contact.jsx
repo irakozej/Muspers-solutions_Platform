@@ -32,7 +32,7 @@ export default function Contact() {
         subject: form.subject,
         message: form.message,
       });
-      setStatus({ state: 'success', message: 'Thanks — your message is with us. We\'ll reply within two business days.' });
+      setStatus({ state: 'success', message: 'Thanks, your message is with us. We\'ll reply within two business days.' });
       setForm(initialForm);
     } catch (err) {
       setStatus({
@@ -59,7 +59,7 @@ export default function Contact() {
           <Reveal delay={0.15}>
             <p className="mt-10 max-w-2xl text-lg leading-relaxed text-musper-muted text-pretty">
               For partnerships, program collaborations, or advisory engagements
-              — tell us a little about what you're working on. We reply within
+             , tell us a little about what you're working on. We reply within
               two business days.
             </p>
           </Reveal>
@@ -119,7 +119,7 @@ export default function Contact() {
                   disabled={status.state === 'submitting'}
                   className="inline-flex items-center gap-2 rounded-full bg-musper-green px-6 py-3 text-sm font-medium text-musper-cream shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-musper-green-deep disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {status.state === 'submitting' ? 'Sending…' : 'Send message'}
+                  {status.state === 'submitting' ? 'Sending...' : 'Send message'}
                 </button>
               </div>
             </form>
@@ -149,7 +149,7 @@ export default function Contact() {
                   </a>
                 </DetailRow>
                 <DetailRow icon={Calendar} label="Book a consultation">
-                  <span className="text-musper-muted">Calendar booking coming soon — drop us a note in the meantime.</span>
+                  <span className="text-musper-muted">Calendar booking coming soon, drop us a note in the meantime.</span>
                 </DetailRow>
               </ul>
             </Reveal>
@@ -157,7 +157,7 @@ export default function Contact() {
             <Reveal delay={0.1}>
               <div className="mt-10 overflow-hidden rounded-[2rem] border border-musper-line shadow-soft">
                 <iframe
-                  title="Musper Solutions office — Kigali, Rwanda"
+                  title="Musper Solutions office, Kigali, Rwanda"
                   src="https://www.google.com/maps?q=Nyarugenge,Kigali,Rwanda&z=14&output=embed"
                   width="100%"
                   height="320"
@@ -191,7 +191,7 @@ function Field({ label, name, value, onChange, type = 'text', required, textarea
           required={required}
           rows={6}
           className={`${cls} mt-2 resize-y`}
-          placeholder="Tell us a little about the project — goals, timeline, who's involved."
+          placeholder="Tell us about the project: goals, timeline, who is involved."
         />
       ) : (
         <input

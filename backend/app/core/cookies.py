@@ -22,7 +22,7 @@ def set_auth_cookies(
     expires_at: datetime,
 ) -> None:
     max_age = _max_age_seconds(expires_at)
-    # The HTTP-only refresh cookie — never readable from JS.
+    # The HTTP-only refresh cookie, never readable from JS.
     response.set_cookie(
         key=REFRESH_COOKIE,
         value=refresh_token,
@@ -33,7 +33,7 @@ def set_auth_cookies(
         path="/",
         domain=settings.cookie_domain or None,
     )
-    # The CSRF cookie — readable from JS so the frontend can echo it back as a header.
+    # The CSRF cookie, readable from JS so the frontend can echo it back as a header.
     response.set_cookie(
         key=CSRF_COOKIE,
         value=csrf_token,

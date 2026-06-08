@@ -8,7 +8,7 @@ export default function ProtectedRoute({ children, roles }) {
   if (isInitializing) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-musper-muted">Checking your session…</p>
+        <p className="text-sm text-musper-muted">Checking your session...</p>
       </div>
     );
   }

@@ -28,9 +28,9 @@ export default function Programs() {
           </Reveal>
           <Reveal delay={0.15}>
             <p className="mt-10 max-w-2xl text-lg leading-relaxed text-musper-muted text-pretty">
-              Our flagship programs strengthen entrepreneurship, empower
-              businesses, and expand economic opportunity across Rwanda. Each one
-              is built on proven methodologies, adapted for the realities on the
+              Our flagship programs strengthen entrepreneurship, help businesses
+              grow, and expand economic opportunity across Rwanda. Each one is
+              built on proven methodologies, adapted for the realities on the
               ground.
             </p>
           </Reveal>

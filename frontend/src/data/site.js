@@ -1,4 +1,4 @@
-// Musper Solutions — content data extracted from the existing site
+// Musper Solutions, content data extracted from the existing site
 // (reference/muspersolutions.com/index.html). Tweak copy here, not in components.
 
 export const brand = {
@@ -25,9 +25,9 @@ export const contactInfo = {
 };
 
 export const stats = [
-  { value: '300+', label: 'Entrepreneurs trained', detail: 'across Rwanda and the region' },
-  { value: '14+', label: 'Years of practice', detail: 'in private-sector development' },
-  { value: '15+', label: 'Institutional clients', detail: 'banks, MFIs, NGOs, government' },
+  { value: '2000+', label: 'Entrepreneurs trained', detail: 'across Rwanda and the region' },
+  { value: '15+', label: 'Years of practice', detail: 'in private-sector development' },
+  { value: '45+', label: 'Institutional clients', detail: 'banks, MFIs, NGOs, government' },
   { value: '10', label: 'Awards & recognitions', detail: 'for impact and delivery' },
 ];
 
@@ -46,6 +46,9 @@ export const services = [
       'Investment readiness preparation',
     ],
     outcome: 'A measurable roadmap from where you are to investment-ready.',
+    image:
+      'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1400&q=80',
+    imageAlt: 'A business advisory meeting in session',
   },
   {
     id: 'capacity',
@@ -60,7 +63,10 @@ export const services = [
       'Women entrepreneurship programs',
       'SME growth workshops',
     ],
-    outcome: 'Founders who can move from idea to operating business — and trainers who can multiply the impact.',
+    outcome: 'Founders who can move from idea to operating business, and trainers who can multiply the impact.',
+    image:
+      'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1400&q=80',
+    imageAlt: 'A training workshop with adult learners',
   },
   {
     id: 'fi-programs',
@@ -75,6 +81,9 @@ export const services = [
       'Portfolio strengthening initiatives',
     ],
     outcome: 'Better-prepared borrowers, healthier portfolios, deeper relationships with SME clients.',
+    image:
+      'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1400&q=80',
+    imageAlt: 'A financial advisory desk with documents and calculations',
   },
   {
     id: 'events',
@@ -89,6 +98,9 @@ export const services = [
       'Sector dialogues',
     ],
     outcome: 'Convenings that create the introductions, deals, and partnerships your sector needs.',
+    image:
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1400&q=80',
+    imageAlt: 'A panel discussion at a business conference',
   },
   {
     id: 'institutional',
@@ -103,6 +115,9 @@ export const services = [
       'Monitoring and evaluation support',
     ],
     outcome: 'Programs grounded in evidence, designed for the realities on the ground.',
+    image:
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1400&q=80',
+    imageAlt: 'A formal strategy meeting in an institutional setting',
   },
 ];
 
@@ -112,7 +127,7 @@ export const programs = [
     name: 'SIYB Rwanda Hub',
     eyebrow: 'Flagship · ILO-certified',
     summary:
-      'The Rwandan hub for the International Labour Organization\'s Start and Improve Your Business (SIYB) methodology — a global standard for entrepreneurship training, adapted for the local market.',
+      'The Rwandan hub for the International Labour Organization\'s Start and Improve Your Business (SIYB) methodology, a global standard for entrepreneurship training, adapted for the local market.',
     audience: 'Aspiring entrepreneurs, early-stage founders, and trainers who want to become certified SIYB facilitators.',
     outcomes: [
       'Move from a business idea to a documented business plan',
@@ -138,8 +153,8 @@ export const programs = [
     name: 'Women in Digital Business',
     eyebrow: 'Cohort · 8 weeks',
     summary:
-      'A practical, hands-on program for women entrepreneurs building or scaling businesses with a digital component — from e-commerce to digital services.',
-    audience: 'Women founders and business owners who want to grow through digital channels — online sales, digital marketing, payments, and tools.',
+      'A practical, hands-on program for women entrepreneurs building or scaling businesses with a digital component, from e-commerce to digital services.',
+    audience: 'Women founders and business owners who want to grow through digital channels, online sales, digital marketing, payments, and tools.',
     outcomes: [
       'A working online storefront or service offering',
       'A digital marketing playbook tailored to the business',
@@ -182,7 +197,7 @@ export const values = [
   },
   {
     title: 'Innovation',
-    body: 'We adapt global methodologies to African realities — not the other way around.',
+    body: 'We adapt global methodologies to African realities, not the other way around.',
   },
   {
     title: 'Excellence',
@@ -215,13 +230,13 @@ export const founder = {
   blurb:
     'Penny founded Musper Solutions to close the gap she kept seeing between high-potential African entrepreneurs and the systems, advisory, and capital they needed to scale.',
   bio: [
-    'Over 14+ years of practice across private-sector development, Penny has worked with banks, MFIs, development partners, government institutions, and hundreds of SMEs — from informal traders earning their first profits to growing companies preparing for investment.',
+    'Over 15+ years of practice across private-sector development, Penny has worked with banks, MFIs, development partners, government institutions, and hundreds of SMEs, from informal traders earning their first profits to growing companies preparing for investment.',
     'Her approach is grounded and practical: she pairs globally recognized methodologies (including ILO\'s Start and Improve Your Business) with deep local context, then stays close to the work until results show up on a balance sheet.',
-    'Through Musper, she has trained 300+ entrepreneurs, designed SME programs for financial institutions, and advised development partners on the design of entrepreneurship initiatives across the region.',
+    'Through Musper, she has trained 2000+ entrepreneurs, designed SME programs for financial institutions, and advised development partners on the design of entrepreneurship initiatives across the region.',
   ],
 };
 
-// Photo URLs — curated to depict Black / African professionals in business contexts.
+// Photo URLs, curated to depict Black / African professionals in business contexts.
 // All free-license on Unsplash, attribution not required.
 // To replace any with a real photo: drop the file in frontend/public/ and change
 // the URL here to '/your-filename.jpg' (same pattern as /penny.jpg).

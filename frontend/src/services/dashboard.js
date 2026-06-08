@@ -51,7 +51,7 @@ export const SCORE_BAND = {
   A: { label: 'A', tone: 'good', range: '≥ 80' },
   B: { label: 'B', tone: 'mid', range: '60–79' },
   C: { label: 'C', tone: 'low', range: '< 60' },
-  '—': { label: '—', tone: 'neutral', range: 'no score yet' },
+  '-': { label: '-', tone: 'neutral', range: 'no score yet' },
 };
 
 export const DOMAIN_LABELS = {

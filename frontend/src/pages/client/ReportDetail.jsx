@@ -28,7 +28,7 @@ export default function ClientReportDetail() {
     } finally { setPdfBusy(false); }
   };
 
-  if (loading) return <p className="text-sm text-musper-muted">Loading…</p>;
+  if (loading) return <p className="text-sm text-musper-muted">Loading...</p>;
 
   if (!report) {
     return (
@@ -53,7 +53,7 @@ export default function ClientReportDetail() {
           disabled={pdfBusy}
           className="inline-flex items-center gap-2 rounded-full border border-musper-line bg-musper-cream-soft px-4 py-2 text-sm font-medium text-musper-ink/80 transition hover:border-musper-green/30 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <FileDown size={14} /> {pdfBusy ? 'Generating PDF…' : 'Download PDF'}
+          <FileDown size={14} /> {pdfBusy ? 'Generating PDF...' : 'Download PDF'}
         </button>
       </div>
 

@@ -23,7 +23,7 @@ export default function SessionHistory() {
       />
 
       {loading ? (
-        <p className="text-sm text-musper-muted">Loading…</p>
+        <p className="text-sm text-musper-muted">Loading...</p>
       ) : sessions.length === 0 ? (
         <EmptyState
           icon={History}
@@ -60,7 +60,7 @@ export default function SessionHistory() {
                     {Math.round(s.overall_score)}<span className="text-xs text-musper-muted">/100</span>
                   </span>
                 ) : (
-                  <span className="text-xs text-musper-muted">—</span>
+                  <span className="text-xs text-musper-muted">-</span>
                 )}
               </div>
               <div className="flex flex-wrap items-center gap-2 sm:col-span-4">

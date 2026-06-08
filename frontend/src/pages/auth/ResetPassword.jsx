@@ -27,7 +27,7 @@ export default function ResetPassword() {
     setStatus({ state: 'submitting', message: '' });
     try {
       await authApi.resetPassword(form.token, form.password);
-      setStatus({ state: 'success', message: 'Password updated. Redirecting to sign in…' });
+      setStatus({ state: 'success', message: 'Password updated. Redirecting to sign in...' });
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
       setStatus({ state: 'error', message: err?.message || 'Reset failed.' });
@@ -85,7 +85,7 @@ export default function ResetPassword() {
           disabled={status.state === 'submitting'}
           className="w-full rounded-full bg-musper-green px-6 py-3.5 text-sm font-medium text-musper-cream shadow-soft transition-all duration-300 hover:bg-musper-green-deep disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {status.state === 'submitting' ? 'Updating…' : 'Update password'}
+          {status.state === 'submitting' ? 'Updating...' : 'Update password'}
         </button>
       </form>
     </AuthShell>

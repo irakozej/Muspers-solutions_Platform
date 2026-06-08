@@ -100,7 +100,7 @@ export default function Signup() {
           disabled={busy}
           className="w-full rounded-full bg-musper-green px-6 py-3.5 text-sm font-medium text-musper-cream shadow-soft transition-all duration-300 hover:bg-musper-green-deep disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {busy ? 'Creating account…' : 'Create my account'}
+          {busy ? 'Creating account...' : 'Create my account'}
         </button>
       </form>
     </AuthShell>

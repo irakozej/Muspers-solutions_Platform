@@ -64,7 +64,7 @@ export default function ClientDetail() {
     } finally { setPdfBusy(false); }
   };
 
-  if (loading) return <p className="text-sm text-musper-muted">Loading client…</p>;
+  if (loading) return <p className="text-sm text-musper-muted">Loading client...</p>;
   if (error) return <p className="text-sm text-musper-orange-dark">{error}</p>;
   if (!client) return null;
 
@@ -107,7 +107,7 @@ export default function ClientDetail() {
                 disabled={pdfBusy}
                 className="inline-flex items-center gap-2 rounded-full border border-musper-line bg-musper-cream-soft px-5 py-2.5 text-sm font-medium text-musper-ink/80 transition hover:border-musper-green/30 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <FileDown size={14} /> {pdfBusy ? 'Generating PDF…' : 'Export PDF'}
+                <FileDown size={14} /> {pdfBusy ? 'Generating PDF...' : 'Export PDF'}
               </button>
             </div>
           )
@@ -122,10 +122,10 @@ export default function ClientDetail() {
 
       {/* Business snapshot */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SnapshotTile icon={Mail} label="Contact" value={client.contact_email || '—'} sub={client.contact_name} />
-        <SnapshotTile icon={MapPin} label="Location" value={client.location || '—'} />
-        <SnapshotTile icon={UsersIcon} label="Headcount" value={client.employee_count ?? '—'} sub={client.business_size || ''} />
-        <SnapshotTile icon={Calendar} label="Founded" value={client.founded_year ?? '—'} sub={client.revenue_band || ''} />
+        <SnapshotTile icon={Mail} label="Contact" value={client.contact_email || '-'} sub={client.contact_name} />
+        <SnapshotTile icon={MapPin} label="Location" value={client.location || '-'} />
+        <SnapshotTile icon={UsersIcon} label="Headcount" value={client.employee_count ?? '-'} sub={client.business_size || ''} />
+        <SnapshotTile icon={Calendar} label="Founded" value={client.founded_year ?? '-'} sub={client.revenue_band || ''} />
       </section>
 
       {/* Revenue trend */}
@@ -251,7 +251,7 @@ export default function ClientDetail() {
           <textarea
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
-            placeholder="Add a private note about this client…"
+            placeholder="Add a private note about this client..."
             rows={3}
             className="w-full resize-y rounded-lg border border-musper-line bg-musper-cream-soft px-3 py-2 text-sm focus:border-musper-green focus:outline-none"
           />
@@ -261,7 +261,7 @@ export default function ClientDetail() {
               disabled={noteBusy || !noteText.trim()}
               className="rounded-full bg-musper-green px-5 py-2 text-sm font-medium text-musper-cream disabled:cursor-not-allowed disabled:opacity-60 hover:bg-musper-green-deep"
             >
-              {noteBusy ? 'Saving…' : 'Add note'}
+              {noteBusy ? 'Saving...' : 'Add note'}
             </button>
           </div>
         </form>

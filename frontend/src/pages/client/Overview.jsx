@@ -38,7 +38,7 @@ export default function ClientOverview() {
       />
 
       {loading ? (
-        <p className="text-sm text-musper-muted">Loading…</p>
+        <p className="text-sm text-musper-muted">Loading...</p>
       ) : !hasStarted ? (
         <EmptyState
           icon={Sparkles}
@@ -55,7 +55,7 @@ export default function ClientOverview() {
         />
       ) : (
         <>
-          {/* Shared reports — highlighted */}
+          {/* Shared reports, highlighted */}
           {sharedReports.length > 0 && (
             <section>
               <div className="flex items-baseline justify-between">

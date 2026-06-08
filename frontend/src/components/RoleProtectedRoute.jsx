@@ -8,7 +8,7 @@ export default function RoleProtectedRoute({ children, role }) {
   if (isInitializing) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-musper-muted">Checking your session…</p>
+        <p className="text-sm text-musper-muted">Checking your session...</p>
       </div>
     );
   }
@@ -18,7 +18,7 @@ export default function RoleProtectedRoute({ children, role }) {
   }
 
   if (role && user?.role !== role) {
-    // Wrong role — bounce to whichever dashboard matches their role, or home.
+    // Wrong role, bounce to whichever dashboard matches their role, or home.
     const target = user?.role === 'advisor' ? '/advisor' : user?.role === 'client' ? '/dashboard' : '/';
     return <Navigate to={target} replace />;
   }

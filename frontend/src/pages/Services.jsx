@@ -47,21 +47,31 @@ export default function Services() {
               const reversed = i % 2 === 1;
               return (
                 <article key={service.id} className="py-14 lg:py-20">
-                  <div className={[
-                    'grid items-start gap-10 lg:grid-cols-12 lg:gap-12',
-                  ].join(' ')}>
-                    {/* Number + meta */}
-                    <Reveal className={['lg:col-span-3', reversed ? 'lg:order-3' : ''].join(' ')}>
-                      <p className="font-mono text-xs tracking-tight text-musper-muted">
-                        Service {service.number}
-                      </p>
-                      <p className="mt-3 font-display text-7xl leading-none font-light italic text-musper-green/80">
-                        {service.number}
-                      </p>
+                  <div className="grid items-start gap-10 lg:grid-cols-12 lg:gap-12">
+                    {/* Image */}
+                    <Reveal className={['lg:col-span-4', reversed ? 'lg:order-3' : ''].join(' ')}>
+                      <div className="relative">
+                        <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-musper-green">
+                          {service.image && (
+                            <img
+                              src={service.image}
+                              alt={service.imageAlt || service.title}
+                              loading="lazy"
+                              className="h-full w-full object-cover"
+                            />
+                          )}
+                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-musper-green/50 via-transparent to-transparent" />
+                        </div>
+                        <div className="absolute -bottom-5 -left-4 rounded-2xl border border-musper-line bg-musper-cream-soft px-4 py-3 shadow-soft lg:-bottom-7 lg:-left-7">
+                          <p className="font-mono text-[0.7rem] uppercase tracking-eyebrow text-musper-green">
+                            Service {service.number}
+                          </p>
+                        </div>
+                      </div>
                     </Reveal>
 
                     {/* Body */}
-                    <div className="lg:col-span-6">
+                    <div className="lg:col-span-5">
                       <Reveal delay={0.05}>
                         <h2 className="font-display text-3xl leading-[1.1] tracking-editorial sm:text-[2.5rem] text-balance">
                           {service.title}
@@ -107,7 +117,7 @@ export default function Services() {
             <Reveal>
               <p className="eyebrow !text-musper-orange">Not sure where to start?</p>
               <h2 className="mt-6 font-display text-4xl leading-[1.05] tracking-editorial text-musper-cream sm:text-5xl text-balance">
-                Chat with our assistant — it'll point you to the right service in under three minutes.
+                Chat with our assistant, it'll point you to the right service in under three minutes.
               </h2>
             </Reveal>
           </div>

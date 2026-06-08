@@ -11,7 +11,7 @@ from app.api.health import router as health_router
 from app.core.config import settings
 from app.core.limiter import limiter
 
-try:  # pragma: no cover — older slowapi compat
+try:  # pragma: no cover, older slowapi compat
     from slowapi import _rate_limit_exceeded_handler
 except ImportError:  # pragma: no cover
     from slowapi.extension import _rate_limit_exceeded_handler  # type: ignore

@@ -16,7 +16,7 @@ export default function Analytics() {
     advisorApi.analytics().then((d) => { setData(d); setLoading(false); });
   }, []);
 
-  if (loading) return <p className="text-sm text-musper-muted">Loading…</p>;
+  if (loading) return <p className="text-sm text-musper-muted">Loading...</p>;
   if (!data) return null;
 
   const domainData = Object.entries(data.average_domain_scores).map(([k, v]) => ({
@@ -29,7 +29,7 @@ export default function Analytics() {
       <PageHeading
         eyebrow="Analytics"
         title="Practice in aggregate."
-        description="Patterns across every diagnostic in the system — useful for spotting common gaps and tuning programs."
+        description="Patterns across every diagnostic in the system, useful for spotting common gaps and tuning programs."
       />
 
       <div className="grid gap-4 sm:grid-cols-3">

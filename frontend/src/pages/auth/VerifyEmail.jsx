@@ -18,7 +18,7 @@ export default function VerifyEmail() {
       const data = await authApi.verifyEmail(raw);
       setStatus({
         state: 'success',
-        message: `Verified — welcome, ${data?.full_name || data?.email}.`,
+        message: `Verified, welcome, ${data?.full_name || data?.email}.`,
       });
     } catch (err) {
       setStatus({ state: 'error', message: err?.message || 'Verification failed.' });
@@ -61,7 +61,7 @@ export default function VerifyEmail() {
       ) : (
         <form onSubmit={onSubmit} className="space-y-5">
           <p className="text-base leading-relaxed text-musper-muted">
-            Paste the verification token from your email below — or just open the link directly.
+            Paste the verification token from your email below, or just open the link directly.
             <span className="block mt-2 text-xs text-musper-muted-soft">
               In dev mode, new accounts are auto-verified, so this step is informational only.
             </span>
@@ -86,7 +86,7 @@ export default function VerifyEmail() {
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-musper-green px-6 py-3.5 text-sm font-medium text-musper-cream shadow-soft transition-all duration-300 hover:bg-musper-green-deep disabled:cursor-not-allowed disabled:opacity-60"
           >
             {status.state === 'submitting' && <Loader2 size={15} className="animate-spin" />}
-            {status.state === 'submitting' ? 'Verifying…' : 'Verify email'}
+            {status.state === 'submitting' ? 'Verifying...' : 'Verify email'}
           </button>
         </form>
       )}

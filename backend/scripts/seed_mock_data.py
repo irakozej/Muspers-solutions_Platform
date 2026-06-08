@@ -46,12 +46,12 @@ def _utc(year: int, month: int, day: int) -> datetime:
 # ───────────────────── chat template ─────────────────────
 
 QUESTIONS = [
-    "Welcome to your Musper diagnostic. To start — give me your business in two sentences.",
-    "Walk me through how you bring in revenue today — what are the main streams?",
+    "Welcome to your Musper diagnostic. To start, give me your business in two sentences.",
+    "Walk me through how you bring in revenue today, what are the main streams?",
     "Where do new customers come from for you right now?",
     "When something goes wrong in delivery or production, how do you find out?",
     "Do you have a clear view of cash flow over the next 90 days?",
-    "Tell me about your team — what does the org look like, top to bottom?",
+    "Tell me about your team, what does the org look like, top to bottom?",
     "What's the single biggest constraint on your growth right now?",
 ]
 CLOSING = (
@@ -97,11 +97,11 @@ CLIENTS = [
             {"period": "Q2 '25", "revenue_mrwf": 210},
         ],
         "answers": [
-            "We process fruit and vegetable products — pineapple juice, tomato paste, dried mango — sold in Kigali supermarkets and to two regional distributors.",
+            "We process fruit and vegetable products, pineapple juice, tomato paste, dried mango, sold in Kigali supermarkets and to two regional distributors.",
             "Three streams: supermarket distribution in Rwanda (about 60%), wholesale to Uganda and Burundi distributors (30%), and an institutional contract with a school feeding program (10%).",
-            "Mostly the buyers come to us — we have multi-year contracts with the supermarkets. New growth is via the school program and Uganda referrals.",
+            "Mostly the buyers come to us, we have multi-year contracts with the supermarkets. New growth is via the school program and Uganda referrals.",
             "Our production manager flags it on the floor, and we have a daily morning huddle. Bigger quality issues come back through the supermarkets within a week.",
-            "Yes — we have a monthly cash flow but it's mostly historical. Forward visibility is maybe 30 days.",
+            "Yes, we have a monthly cash flow but it's mostly historical. Forward visibility is maybe 30 days.",
             "I'm the CEO, my brother handles operations, we have a finance lead, a production manager, a sales lead, and 40 production staff. The production team has a lot of turnover.",
             "Talent. We're losing skilled production line workers every 6–9 months and it's slowing our quality consistency.",
         ],
@@ -138,7 +138,7 @@ CLIENTS = [
         "rating": (5, "Very practical and tailored to our context. The retention plan is already in motion."),
         "session_completed_days_ago": 8,
         "advisor_notes": [
-            "Marie-Claire is open to a follow-up clinic on retention — schedule for Q3.",
+            "Marie-Claire is open to a follow-up clinic on retention, schedule for Q3.",
             "Brother (Ops Manager) likely needs leadership coaching before succession can move.",
         ],
     },
@@ -161,11 +161,11 @@ CLIENTS = [
             {"period": "Q2 '25", "revenue_mrwf": 95},
         ],
         "answers": [
-            "Karame is a specialty coffee exporter — we source from 200+ smallholder farmers around Huye, mill, and export green beans, mostly to European roasters.",
+            "Karame is a specialty coffee exporter, we source from 200+ smallholder farmers around Huye, mill, and export green beans, mostly to European roasters.",
             "Pretty much all export sales to European specialty roasters. About 80% to three German roasters and 20% to a UK partner.",
             "Mostly trade shows and roaster referrals. One of our German buyers has introduced us to three new roasters this year.",
-            "Quality complaints come from buyers via email — usually 4–6 weeks after shipment. By then we can't trace it back to a specific lot easily.",
-            "Honestly no — our money is locked up in the harvest cycle. Between buying cherries and getting paid by exporters, we go 4–5 months out of pocket.",
+            "Quality complaints come from buyers via email, usually 4–6 weeks after shipment. By then we can't trace it back to a specific lot easily.",
+            "Honestly no, our money is locked up in the harvest cycle. Between buying cherries and getting paid by exporters, we go 4–5 months out of pocket.",
             "Me, my co-founder (head of sourcing), a milling supervisor, an export logistics person, two field officers, and the rest are mill workers seasonal.",
             "Working capital. I cannot say yes to bigger contracts because I can't fund the cherry purchase up front.",
         ],
@@ -177,7 +177,7 @@ CLIENTS = [
         ),
         "red_flags": [
             "Cash flow gaps between cherry purchase and export payment (4–5 months)",
-            "No formal pricing model — margins eroded by FX volatility",
+            "No formal pricing model, margins eroded by FX volatility",
         ],
         "priority_actions": [
             {
@@ -228,7 +228,7 @@ CLIENTS = [
             "Three streams: lodge stays (55%), tour packages (35%), and a small spa/wellness operation (10%).",
             "About 65% of revenue comes through one large international tour operator. The rest is direct online and partner travel agencies.",
             "Lodge managers report daily. Tour incidents come through guides via WhatsApp the same day. We're proud of our incident response.",
-            "Yes — we run a monthly cash flow and a 90-day projection. The CFO updates it weekly.",
+            "Yes, we run a monthly cash flow and a 90-day projection. The CFO updates it weekly.",
             "I'm CEO, we have a CFO, an Operations Director, two lodge managers, a tours lead, marketing lead, and ~60 staff across both lodges.",
             "Channel concentration. If our main tour operator drops us, we lose 65% overnight. It keeps me up.",
         ],
@@ -239,11 +239,11 @@ CLIENTS = [
             "Diversifying channels is the highest-leverage move."
         ),
         "red_flags": [
-            "Revenue concentration — 65% from a single tour operator",
+            "Revenue concentration, 65% from a single tour operator",
         ],
         "priority_actions": [
             {
-                "title": "Diversify channels — build direct online booking funnel",
+                "title": "Diversify channels, build direct online booking funnel",
                 "detail": "Aim to move from 12% direct to 30% direct over 12 months. Hire a digital marketing lead.",
                 "owner": "CEO + Marketing Lead",
                 "horizon": "12 months",
@@ -287,20 +287,20 @@ CLIENTS = [
             "We design and produce contemporary African-print ready-to-wear, sold through one Kigali boutique we own and a small Instagram shop.",
             "About 70% physical retail at our shop, 30% Instagram + WhatsApp orders.",
             "Mostly Instagram. We get a lot of saves but conversion is slow. Walk-ins to the shop convert best.",
-            "Honestly, often through customer complaints — sizing issues, late delivery on custom orders.",
+            "Honestly, often through customer complaints, sizing issues, late delivery on custom orders.",
             "Not really. We know what's in the bank but I don't have a 90-day view.",
             "I'm the designer/CEO, my sister is operations, we have 4 tailors, 2 cutters, 2 shop staff, a social media person, and a part-time accountant.",
-            "Honestly — cash. We have orders we cannot deliver because we cannot pay for fabric up front.",
+            "Honestly, cash. We have orders we cannot deliver because we cannot pay for fabric up front.",
         ],
         "scores": {"strategy": 75, "customers": 70, "money": 45, "operations": 52, "talent": 65},
         "summary": (
             "Strong creative vision and growing demand, but the business is stretched thin "
             "operationally. Cost tracking is absent, inventory is heavy, and cash conversion is "
-            "slow. Fixing the financial visibility unlocks the next stage."
+            "slow. Fixing the financial visibility is what makes the next stage possible."
         ),
         "red_flags": [
-            "No unit-level cost tracking — gross margin is unknown",
-            "Inventory carrying ~9 months — significant working capital lock-up",
+            "No unit-level cost tracking, gross margin is unknown",
+            "Inventory carrying ~9 months, significant working capital lock-up",
         ],
         "priority_actions": [
             {
@@ -352,7 +352,7 @@ CLIENTS = [
             "Word of mouth and guides. We're not really doing any marketing.",
             "I'm there every day so I see things directly.",
             "No, I don't track money in any structured way. I know roughly what's in the box.",
-            "Me and five weavers — four women, one apprentice.",
+            "Me and five weavers, four women, one apprentice.",
             "Honestly I don't even know my margins. I price by what feels right at the time.",
         ],
         "scores": {"strategy": 55, "customers": 72, "money": 38, "operations": 50, "talent": 60},
@@ -388,7 +388,7 @@ CLIENTS = [
         "rating": (5, "She made it feel doable. We've already opened the bank account."),
         "session_completed_days_ago": 22,
         "advisor_notes": [
-            "Refer Solange to the next SIYB cohort — perfect fit.",
+            "Refer Solange to the next SIYB cohort, perfect fit.",
             "Follow up in 30 days to make sure the cash-in/cash-out sheet is being kept.",
         ],
     },
@@ -413,7 +413,7 @@ CLIENTS = [
         "answers": [
             "We operate a network of 35 mobile money agent points across Kigali and Nyabugogo. We do deposits, withdrawals, bill payments.",
             "Commission on transactions through our partner telco, plus a small mark-up on certain bill-payment categories.",
-            "Foot traffic at our agent points. We don't really 'acquire' customers — they walk up.",
+            "Foot traffic at our agent points. We don't really 'acquire' customers, they walk up.",
             "Our area supervisors do daily route checks. Cash float issues get flagged via WhatsApp.",
             "Float management is our cash flow, basically. We're disciplined on that.",
             "I'm CEO, my partner handles operations, three area supervisors, and 18 agents at the points.",
@@ -470,7 +470,7 @@ CLIENTS = [
             {"period": "Q1 '25", "revenue_mrwf": 190},
             {"period": "Q2 '25", "revenue_mrwf": 200},
         ],
-        # In-progress session — no answers needed past the first few.
+        # In-progress session, no answers needed past the first few.
         "answers": None,
         "scores": None,  # No report yet
         "summary": None,
@@ -480,7 +480,7 @@ CLIENTS = [
         "in_progress": True,
         "in_progress_turns": 4,
         "in_progress_answers": [
-            "We manufacture plastic household goods — buckets, basins, jerry cans, basic kitchenware — for the East African market.",
+            "We manufacture plastic household goods, buckets, basins, jerry cans, basic kitchenware, for the East African market.",
             "Mostly wholesale to distributors in Rwanda, Uganda, and Burundi. About 75/25 split between Rwanda and exports.",
         ],
         "advisor_notes": [
@@ -506,9 +506,9 @@ CLIENTS = [
             {"period": "Q2 '25", "revenue_mrwf": 110},
         ],
         "answers": [
-            "We run a small trucking fleet — 8 trucks — moving cargo between Goma, Rubavu, and Kigali. Mostly food and consumer goods.",
-            "Per-trip charges to a small set of repeat clients — wholesalers and a couple of NGOs.",
-            "Cold outreach by my partner — he visits warehouses in Kigali every two months.",
+            "We run a small trucking fleet, 8 trucks, moving cargo between Goma, Rubavu, and Kigali. Mostly food and consumer goods.",
+            "Per-trip charges to a small set of repeat clients, wholesalers and a couple of NGOs.",
+            "Cold outreach by my partner, he visits warehouses in Kigali every two months.",
             "Drivers report in by phone. Cargo damage we usually find out at delivery.",
             "I have a rough monthly picture, not weekly or 90-day.",
             "Me, my partner, 8 drivers, a workshop mechanic, a dispatcher, and 4 part-time loaders.",
@@ -517,7 +517,7 @@ CLIENTS = [
         "scores": {"strategy": 60, "customers": 62, "money": 70, "operations": 65, "talent": 48},
         "summary": (
             "Cash discipline is reasonable but the workforce is fragile. Driver turnover is the "
-            "operational weak point — every churned driver costs roughly two months of "
+            "operational weak point, every churned driver costs roughly two months of "
             "productivity to replace. Stabilising the team is the lever."
         ),
         "red_flags": [
@@ -564,7 +564,7 @@ def main() -> int:
         if demo_users:
             print(f"  cleared {len(demo_users)} previous demo users")
 
-        # Find Penny (advisor) — required for notes.
+        # Find Penny (advisor), required for notes.
         advisor = db.scalar(select(User).where(User.role == UserRole.advisor))
         if advisor is None:
             print("✗  No advisor user found. Run `python -m scripts.seed_advisor` first.")
@@ -607,7 +607,7 @@ def main() -> int:
                 )
                 db.add(session)
                 db.flush()
-                # Partial transcript — just opening Q&A turns.
+                # Partial transcript, just opening Q&A turns.
                 t = started
                 for i in range(c["in_progress_turns"] // 2):
                     db.add(
@@ -696,14 +696,14 @@ def main() -> int:
                     )
                 )
 
-            print(f"  ✓ {c['business_name']:35} ({email}) — {DEMO_PASSWORD}")
+            print(f"  ✓ {c['business_name']:35} ({email}), {DEMO_PASSWORD}")
 
         db.commit()
 
         print()
         print(f"✓ Seeded {len(CLIENTS)} demo clients.")
         print(f"  Every client password: {DEMO_PASSWORD}")
-        print(f"  Sign in as any with: client01{DEMO_EMAIL_DOMAIN} … client08{DEMO_EMAIL_DOMAIN}")
+        print(f"  Sign in as any with: client01{DEMO_EMAIL_DOMAIN} ... client08{DEMO_EMAIL_DOMAIN}")
         return 0
 
 

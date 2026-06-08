@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { MessageCircle, ArrowUpRight } from 'lucide-react';
 
-// Distinctive recurring CTA — used inline on Home, Services, etc.
+// Distinctive recurring CTA, used inline on Home, Services, etc.
 // A wider, editorial pill with a chat icon and a leading orange dot.
 export default function ChatCTA({ to = '/diagnostic', label = 'Chat with our assistant', tone = 'light', className = '' }) {
   const dark = tone === 'dark';

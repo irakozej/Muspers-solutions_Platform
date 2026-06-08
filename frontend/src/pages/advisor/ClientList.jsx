@@ -81,7 +81,7 @@ export default function ClientList() {
         </div>
 
         {loading ? (
-          <div className="px-6 py-12 text-center text-sm text-musper-muted">Loading…</div>
+          <div className="px-6 py-12 text-center text-sm text-musper-muted">Loading...</div>
         ) : filtered.length === 0 ? (
           <div className="px-6 py-12 text-center text-sm text-musper-muted">No clients match.</div>
         ) : (
@@ -96,12 +96,12 @@ export default function ClientList() {
                   <p className="font-display text-lg leading-tight tracking-editorial">
                     {c.business_name}
                   </p>
-                  <p className="mt-0.5 text-xs text-musper-muted">{c.location || '—'}</p>
+                  <p className="mt-0.5 text-xs text-musper-muted">{c.location || '-'}</p>
                 </div>
-                <div className="text-sm text-musper-ink/80 lg:col-span-2">{c.sector || '—'}</div>
+                <div className="text-sm text-musper-ink/80 lg:col-span-2">{c.sector || '-'}</div>
                 <div className="lg:col-span-1 lg:text-right">
                   <span className="font-display text-lg font-medium italic text-musper-green">
-                    {c.overall_score ? Math.round(c.overall_score) : '—'}
+                    {c.overall_score ? Math.round(c.overall_score) : '-'}
                   </span>
                 </div>
                 <div className="lg:col-span-1 lg:text-center">

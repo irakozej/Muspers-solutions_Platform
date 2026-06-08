@@ -46,7 +46,7 @@ export default function ForgotPassword() {
               <p className="font-medium">Reset link issued.</p>
               <p className="mt-1 text-sm text-musper-ink/80">{status.message}</p>
               <p className="mt-4 text-xs text-musper-muted">
-                In development the link is logged to the backend console — check the uvicorn output.
+                In development the link is logged to the backend console, check the uvicorn output.
               </p>
             </div>
           </div>
@@ -76,7 +76,7 @@ export default function ForgotPassword() {
             disabled={status.state === 'submitting'}
             className="w-full rounded-full bg-musper-green px-6 py-3.5 text-sm font-medium text-musper-cream shadow-soft transition-all duration-300 hover:bg-musper-green-deep disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {status.state === 'submitting' ? 'Sending…' : 'Send reset link'}
+            {status.state === 'submitting' ? 'Sending...' : 'Send reset link'}
           </button>
         </form>
       )}

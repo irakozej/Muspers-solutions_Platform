@@ -1,8 +1,9 @@
 # Musper Solutions Platform
 
-Custom platform for **Musper Solutions Ltd** — a business consultancy in Kigali, Rwanda.
-This repo is the Phase 1 scaffold: project structure, tooling, base UI shell, database schema,
-and a working `/health` endpoint. No auth, no AI integrations, no business logic yet.
+Custom platform for **Musper Solutions Ltd**, a business consultancy in Kigali, Rwanda.
+The repo holds the public website, the advisor and client dashboards, JWT auth,
+the Hatana-style diagnostic report (with PDF export), and the seed scripts that
+populate demo data for the dashboards.
 
 ## Stack
 
@@ -53,7 +54,7 @@ Fonts: **Poppins** (display) + **Inter** (body), loaded from Google Fonts in
   # then either restart your shell or:
   source $HOME/.local/bin/env
   ```
-  `uv` will download and pin Python 3.11 for the backend automatically — no system Python install needed.
+  `uv` will download and pin Python 3.11 for the backend automatically, no system Python install needed.
 
 ---
 
@@ -109,7 +110,7 @@ npm install                   # first time only
 npm run dev
 ```
 
-Open <http://localhost:5173> — you should see the Musper Solutions placeholder
+Open <http://localhost:5173>, you should see the Musper Solutions placeholder
 homepage with brand colors, Navbar, and Footer.
 
 ---
@@ -156,7 +157,7 @@ uv run pytest
 
 ## What's intentionally not here (will land in later phases)
 
-- Phase 2 — full marketing site content
-- Phase 3 — JWT auth + bcrypt password hashing
-- Phase 4 — Anthropic Claude API integration for the diagnostic chat
-- Phase 5+ — Cal.com, Wave, Mailchimp integrations
+- Phase 4: the diagnostic chat itself (currently a "coming soon" placeholder; mock
+  transcripts feed the dashboards in the meantime)
+- Phase 7: Cal.com, Wave, and Mailchimp integrations
+- Phase 8: production deploy + CI

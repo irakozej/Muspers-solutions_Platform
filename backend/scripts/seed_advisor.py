@@ -17,7 +17,7 @@ import os
 import sys
 from pathlib import Path
 
-# Allow running from anywhere — make sure the backend dir is on sys.path.
+# Allow running from anywhere, make sure the backend dir is on sys.path.
 HERE = Path(__file__).resolve()
 BACKEND_DIR = HERE.parent.parent
 if str(BACKEND_DIR) not in sys.path:
@@ -47,7 +47,7 @@ def main() -> int:
             existing.reset_token_expires_at = None
             existing.verification_token_hash = None
             existing.verification_token_expires_at = None
-            # Revoke every active refresh token — a password change should sign other sessions out.
+            # Revoke every active refresh token, a password change should sign other sessions out.
             for rt in existing.refresh_tokens:
                 if rt.revoked_at is None:
                     from datetime import datetime, timezone

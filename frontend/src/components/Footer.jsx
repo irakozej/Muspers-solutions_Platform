@@ -7,7 +7,7 @@ export default function Footer() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  // Placeholder newsletter handler — Mailchimp wiring lands in a later phase.
+  // Placeholder newsletter handler, Mailchimp wiring lands in a later phase.
   const onSubscribe = (e) => {
     e.preventDefault();
     if (!email) return;
@@ -51,7 +51,7 @@ export default function Footer() {
           </p>
           {submitted ? (
             <p className="mt-6 rounded-2xl border border-musper-cream/15 bg-musper-cream/5 px-5 py-4 text-sm text-musper-cream/85">
-              Thanks — we'll be in touch when the next dispatch is ready.
+              Thanks, we'll be in touch when the next dispatch is ready.
             </p>
           ) : (
             <form onSubmit={onSubscribe} className="mt-6 flex items-center gap-2 rounded-full border border-musper-cream/20 bg-musper-cream/5 p-1.5 focus-within:border-musper-orange/60">

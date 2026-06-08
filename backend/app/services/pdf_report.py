@@ -103,7 +103,7 @@ BAND_TONE_COLOR = {
     "A": (GREEN, CREAM, GREEN),       # bg, fg, border
     "B": (CREAM_SOFT, GREEN, GREEN),
     "C": (ORANGE_SOFT, ORANGE, ORANGE),
-    "—": (CREAM_SOFT, MUTED, LINE),
+    "-": (CREAM_SOFT, MUTED, LINE),
 }
 MUSPER = {
     "address": "KN 12, Nyarugenge, Kigali, Rwanda",
@@ -212,7 +212,7 @@ class BandBadgeWithScore(Flowable):
         serif = _font("Fraunces", "Times-Roman")
         serif_b = _font("Fraunces-Bold", "Times-Bold")
         sans = _font("Geist", "Helvetica")
-        bg, fg, border = BAND_TONE_COLOR.get(self.band or "—", BAND_TONE_COLOR["—"])
+        bg, fg, border = BAND_TONE_COLOR.get(self.band or "-", BAND_TONE_COLOR["-"])
 
         # Badge circle
         r = 18
@@ -223,7 +223,7 @@ class BandBadgeWithScore(Flowable):
         c.circle(cx, cy, r, stroke=1, fill=1)
         c.setFillColor(fg)
         c.setFont(serif_b, 18)
-        c.drawCentredString(cx, cy - 6.5, self.band or "—")
+        c.drawCentredString(cx, cy - 6.5, self.band or "-")
 
         # Number + " / 100"
         score_int = int(round(self.score or 0))
@@ -461,7 +461,7 @@ def _draw_cover(
     canvas.drawString(22 * mm, block_y, "Prepared for")
     canvas.setFillColor(CREAM)
     canvas.setFont(serif, 22)
-    canvas.drawString(22 * mm, block_y - 26, client.get("business_name", "—"))
+    canvas.drawString(22 * mm, block_y - 26, client.get("business_name", "-"))
     canvas.setFillColor(Color(0.96, 0.95, 0.92, alpha=0.85))
     canvas.setFont(sans, 10)
     sub_line = client.get("contact_name") or "Founder & Owner"
@@ -496,7 +496,7 @@ def _draw_main_chrome(canvas, doc, *, business_name: str) -> None:
     canvas.setFont(sans, 7.5)
     canvas.drawString(
         18 * mm, y,
-        f"Confidential — prepared solely for {business_name}",
+        f"Confidential, prepared solely for {business_name}",
     )
     canvas.drawRightString(
         w - 18 * mm, y,
@@ -525,7 +525,7 @@ def render_report_pdf(
     report_id = str(report.get("id", uuid.uuid4()))
     report_ref = f"MS-{report_id[:8].upper()}"
     issued_date = _format_date(issued_dt)
-    business_name = client.get("business_name", "—")
+    business_name = client.get("business_name", "-")
 
     # Document setup
     buffer = BytesIO()
@@ -547,7 +547,7 @@ def render_report_pdf(
     doc = BaseDocTemplate(
         buffer,
         pagesize=A4,
-        title=f"Musper Diagnostic Report — {business_name}",
+        title=f"Musper Diagnostic Report, {business_name}",
         author="Musper Solutions",
         subject="Integrated Diagnostic Report",
         leftMargin=margin,
@@ -693,18 +693,18 @@ def _snapshot_table(client: dict, styles: dict, frame_w: float) -> Table:
 
     rows = [
         [
-            cell("Sector", client.get("sector") or "—"),
-            cell("Location", client.get("location") or "—"),
+            cell("Sector", client.get("sector") or "-"),
+            cell("Location", client.get("location") or "-"),
         ],
         [
             cell(
                 "Headcount",
-                str(client.get("employee_count")) if client.get("employee_count") is not None else "—",
+                str(client.get("employee_count")) if client.get("employee_count") is not None else "-",
                 f"{client.get('business_size').capitalize()} business" if client.get("business_size") else "",
             ),
             cell(
                 "Founded",
-                str(client.get("founded_year") or "—"),
+                str(client.get("founded_year") or "-"),
                 client.get("revenue_band") or "",
             ),
         ],
@@ -786,14 +786,14 @@ def _headline_card(label: str, band: str, score: float, note: str, styles: dict,
 def _headline_table(headline: dict, styles: dict, frame_w: float) -> Table:
     grow = _headline_card(
         "GROW Overall",
-        headline.get("grow_band", "—"),
+        headline.get("grow_band", "-"),
         float(headline.get("grow_overall", 0)),
         "Composite across Strategy, Customers, Money, Operations, Talent.",
         styles, frame_w / 2,
     )
     finance = _headline_card(
         "Finance Readiness",
-        headline.get("finance_band", "—"),
+        headline.get("finance_band", "-"),
         float(headline.get("finance_readiness", 0)),
         "Weighted toward Money, Operations, and Strategy.",
         styles, frame_w / 2,

@@ -23,7 +23,7 @@ export default function Testimonials() {
           </Reveal>
           <Reveal delay={0.15}>
             <p className="mt-10 max-w-2xl text-lg leading-relaxed text-musper-muted text-pretty">
-              We measure success in what our clients say about the work — once
+              We measure success in what our clients say about the work, once
               it's over, once it's tested, once the impact has had time to land.
             </p>
           </Reveal>
@@ -50,7 +50,7 @@ export default function Testimonials() {
         </div>
       </section>
 
-      {/* GRID OF QUOTES — editorial, magazine columns */}
+      {/* GRID OF QUOTES, editorial, magazine columns */}
       <section className="py-12 lg:py-20">
         <div className="container">
           <div className="grid gap-8 lg:grid-cols-12">
