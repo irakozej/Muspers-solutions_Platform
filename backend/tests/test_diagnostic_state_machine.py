@@ -252,7 +252,7 @@ def test_fallback_next_question_handles_all_stage_targets():
     for area in cb.SCAN_AREAS:
         out = cb._fallback_next_question({
             "stage": "branch", "area": area,
-            "question_topic": cb.BRANCH_QUESTIONS[area["key"]],
+            "question": cb.BRANCH_QUESTIONS[area["key"]],
         })
         assert out
     # Triangulate

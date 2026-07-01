@@ -47,17 +47,17 @@ SNAPSHOT_STEPS: list[dict[str, Any]] = [
 ]
 
 # Areas in the Scan stage. Each has two parts:
-#   - audience_topic: what the question is about, in audience-facing language.
-#     This is the only thing the user should ever hear.
-#   - model_guidance: a private note about what you are listening for. Used in
-#     the system prompt to shape scoring; must never be repeated to the user.
+#   - audience_question: a second-person question the model can ask almost
+#     verbatim. This is what the user hears.
+#   - model_guidance: a private note about what to listen for when scoring.
+#     Used in the system prompt only; must never be repeated to the user.
 SCAN_AREAS: list[dict[str, Any]] = [
     {
         "key": "A",
         "name": "Strategic Clarity",
-        "audience_topic": (
-            "where they want the business to be in two to three years, "
-            "and how clear the plan is for getting there"
+        "audience_question": (
+            "Where do you want the business to be in two or three years, "
+            "and how clear is the plan for getting there?"
         ),
         "model_guidance": (
             "You are listening for whether they have a real, owned strategic "
@@ -67,9 +67,9 @@ SCAN_AREAS: list[dict[str, Any]] = [
     {
         "key": "B",
         "name": "Operations and Systems",
-        "audience_topic": (
-            "how the business runs day to day, and whether important processes "
-            "are written down or live mostly in people's heads"
+        "audience_question": (
+            "How does the business run day to day, and are the important "
+            "processes written down or living mostly in people's heads?"
         ),
         "model_guidance": (
             "You are gauging operational maturity. Key signals: documentation, "
@@ -79,9 +79,9 @@ SCAN_AREAS: list[dict[str, Any]] = [
     {
         "key": "C",
         "name": "People and Capacity",
-        "audience_topic": (
-            "how the team is set up today, and whether they have the right "
-            "people and skills to deliver what the business is trying to do"
+        "audience_question": (
+            "How is your team set up right now, and do you have the right "
+            "people and skills for what you are trying to do?"
         ),
         "model_guidance": (
             "Listen for headcount adequacy, skill gaps, and any retention "
@@ -91,9 +91,9 @@ SCAN_AREAS: list[dict[str, Any]] = [
     {
         "key": "D",
         "name": "Funding and Resource Mobilization",
-        "audience_topic": (
-            "how the business is funded, how predictable that money is, "
-            "and whether it matches what they are trying to deliver"
+        "audience_question": (
+            "How is the business funded today, and how predictable is that "
+            "money against what you are trying to deliver?"
         ),
         "model_guidance": (
             "Listen for funding diversity, cash predictability, and whether "
@@ -103,9 +103,9 @@ SCAN_AREAS: list[dict[str, Any]] = [
     {
         "key": "E",
         "name": "Governance and Structure",
-        "audience_topic": (
-            "how big decisions get made in the business, and whether there is "
-            "a board, advisors, or other governance helping move things"
+        "audience_question": (
+            "How do the big decisions get made in the business? Do you have "
+            "a board or advisors that actually help things move?"
         ),
         "model_guidance": (
             "Listen for whether governance exists on paper only, whether "
@@ -115,9 +115,9 @@ SCAN_AREAS: list[dict[str, Any]] = [
     {
         "key": "F",
         "name": "Stakeholder and Customer Engagement",
-        "audience_topic": (
-            "how the business brings customers or beneficiaries in, and how "
-            "well it keeps them engaged once they are in"
+        "audience_question": (
+            "How do you bring customers or beneficiaries in, and how well "
+            "do you keep them engaged once they are with you?"
         ),
         "model_guidance": (
             "Listen for whether the bigger weakness is acquisition or retention."
@@ -128,84 +128,85 @@ SCAN_AREAS: list[dict[str, Any]] = [
 SCAN_AREA_KEYS: list[str] = [a["key"] for a in SCAN_AREAS]
 SCAN_AREA_MAP: dict[str, dict[str, Any]] = {a["key"]: a for a in SCAN_AREAS}
 
-# Branch questions. Each fires only when the matching Scan area scored 1–3.
-# Phrased as one conversational turn that may cover multiple sub-points;
-# the model handles internal conditional logic gracefully.
+# Branch questions - direct second-person, ready to be asked with only light
+# acknowledgment as prelude. Fire only when the matching Scan area scored 1-3.
+# The model may add a brief acknowledgment before asking, and may soften the
+# conditional wording, but should not alter the substance.
 BRANCH_QUESTIONS: dict[str, str] = {
     "A": (
-        "Ask whether there is a written strategy or business plan today. "
-        "If yes but it isn't being followed, ask what stops it being followed "
-        "(resources, buy-in, unclear ownership, or that it no longer matches "
-        "reality). Also ask when it was last revisited and what has changed "
-        "since. You can ask all of this in one warm turn."
+        "Do you have a written strategy or business plan today? "
+        "If you do but it is not really being followed, what stops it: is it "
+        "resources, buy-in, unclear ownership, or that it no longer matches "
+        "reality? And when was it last revisited?"
     ),
     "B": (
-        "Ask them to walk you through how one core process (a sale, a client "
-        "request, a membership renewal, whichever fits their business) "
-        "actually happens today, step by step. Then ask where it breaks down "
-        "or slows most, and whether it is a tools problem, a people problem, "
-        "or a decision-rights problem."
+        "Walk me through how one core process actually happens today, step by "
+        "step. Pick whichever fits best: a sale, a client request, a "
+        "membership renewal. Where does it break down or slow the most, and "
+        "is it more of a tools problem, a people problem, or a decision-rights "
+        "problem?"
     ),
     "C": (
-        "Ask whether the gap is a skills gap, a headcount gap, or a "
-        "motivation/retention gap. If they say skills, ask which specific "
-        "skill is missing and what the gap is costing them. Also ask whether "
-        "leaders have had any formal training in the last two years."
+        "Is what you are running into a skills gap, a headcount gap, or a "
+        "motivation and retention gap? If it is skills, which specific skill "
+        "is missing, and what is the gap costing you? And have your leaders "
+        "had any formal training in the last two years?"
     ),
     "D": (
-        "Ask whether they have applied for funding and been rejected, or have "
-        "not applied at all. If rejected, ask the reason given. If not "
-        "applied, ask what's stopping them — no funder pipeline, no capacity "
-        "to write proposals, or no track record they can point to."
+        "Have you applied for outside funding and been rejected, or have you "
+        "not applied at all? If you were rejected, what reason were you given? "
+        "If you have not applied, what has stopped you: no funder pipeline, "
+        "no capacity to write proposals, or no track record to point to?"
     ),
     "E": (
-        "Ask whether a board or governance structure exists on paper but "
-        "doesn't really function, or doesn't exist at all. Then ask what "
-        "specific decisions are currently stuck waiting on governance."
+        "Does a board or governance structure exist on paper but not really "
+        "function, or does it not exist at all? And what specific decisions "
+        "are stuck right now waiting on governance?"
     ),
     "F": (
-        "Ask whether the bigger issue is acquisition (bringing customers in) "
-        "or retention (keeping them). If retention, ask at what point in the "
-        "relationship customers tend to disengage."
+        "Is the bigger issue acquisition (bringing customers in) or retention "
+        "(keeping them)? If it is retention, at what point in the relationship "
+        "do customers usually disengage?"
     ),
 }
 
+# Triangulate questions - direct second-person, always asked to every client.
+# The model may phrase acknowledgment before asking but should ask the
+# audience_question essentially as-written.
 TRIANGULATE_STEPS: list[dict[str, str]] = [
     {
         "id": "magic_wand",
-        "topic": (
-            "If the biggest issue they've described disappeared tomorrow, "
-            "what would actually change for the business? You are looking for "
-            "what they think the unlock would be."
+        "audience_question": (
+            "If the biggest issue we've been talking about just disappeared "
+            "tomorrow, what would actually change for the business?"
         ),
     },
     {
         "id": "already_tried",
-        "topic": (
-            "What they have already tried to fix this, and why it did not "
-            "work. Be curious, not accusatory."
+        "audience_question": (
+            "What have you already tried to fix this, and why didn't it work?"
         ),
     },
     {
         "id": "ownership",
-        "topic": (
-            "Whose problem this is inside the organization — who feels it "
-            "most, and who actually has the power to fix it."
+        "audience_question": (
+            "Whose problem is this inside the organization? Who feels it most, "
+            "and who actually has the power to fix it?"
         ),
     },
     {
         "id": "single_fix",
-        "topic": (
-            "If they could fix ONE thing in the next six months, what would "
-            "it be."
+        "audience_question": (
+            "If you could fix just ONE thing in the next six months, what "
+            "would it be?"
         ),
     },
     {
         "id": "budget_appetite",
-        "topic": (
-            "Their budget and timeline appetite: roughly are they looking for "
-            "a quick consult, or a six to twelve month engagement. It's fine "
-            "for them to give a range."
+        "audience_question": (
+            "What is your budget and timeline appetite for this? Are you "
+            "thinking more of a short consult, or something closer to a "
+            "six to twelve month engagement? A rough range is fine."
         ),
     },
 ]
@@ -274,7 +275,7 @@ def next_target(state: dict[str, Any]) -> dict[str, Any] | None:
             return {
                 "stage": "branch",
                 "area": SCAN_AREA_MAP[area_key],
-                "question_topic": BRANCH_QUESTIONS[area_key],
+                "question": BRANCH_QUESTIONS[area_key],
             }
         state["stage"] = "triangulate"
 
@@ -512,10 +513,14 @@ RECORD_TOOL: dict[str, Any] = {
 
 
 def _describe_target(target: dict[str, Any] | None) -> str:
-    """Builds the per-target instruction for the model. Note: audience_topic /
-    topic strings are pure subject matter (safe if echoed back to the user);
-    model_guidance / question_topic strings are private notes for the model
-    and must be clearly marked as such so they don't leak into output."""
+    """Builds the per-target instruction for the model.
+
+    Scan / Branch / Triangulate targets carry an `audience_question` (Scan &
+    Triangulate) or `question` (Branch) string that is already phrased in
+    second person and is safe to say as-is. The model can lightly rephrase
+    for warmth but should keep the substance. The private model_guidance on
+    Scan areas is marked and must never leak into the reply.
+    """
     if target is None:
         return "(none - interview is finishing)"
     stage = target["stage"]
@@ -528,22 +533,26 @@ def _describe_target(target: dict[str, Any] | None) -> str:
     if stage == "scan":
         a = target["area"]
         return (
-            f"Scan area {a['key']} ({a['name']}). Ask the client ONE natural, "
-            f"open question about {a['audience_topic']}. "
+            f"Scan area {a['key']} ({a['name']}). Ask the client this question "
+            f"(you may lightly reword for warmth, keep the substance): "
+            f"\"{a['audience_question']}\" "
             f"[Private listening guidance, do NOT repeat in your text reply: "
             f"{a['model_guidance']}]"
         )
     if stage == "branch":
         a = target["area"]
         return (
-            f"Branch question for area {a['key']} ({a['name']}). [Private guidance, "
-            f"do NOT quote verbatim, rephrase naturally as one warm turn: "
-            f"{target['question_topic']}]"
+            f"Branch question for area {a['key']} ({a['name']}). Ask the client "
+            f"the following (you may lightly reword for warmth, keep the substance, "
+            f"and do NOT prefix with meta-labels like 'a reflective question' or "
+            f"'staying on that area'): \"{target['question']}\""
         )
     if stage == "triangulate":
         return (
-            f"Triangulate question '{target['step']['id']}'. Ask the client about "
-            f"{target['step']['topic']}"
+            f"Triangulate question '{target['step']['id']}'. Ask the client this "
+            f"question (you may lightly reword for warmth, keep the substance, "
+            f"and do NOT prefix with meta-labels like 'a reflective question'): "
+            f"\"{target['step']['audience_question']}\""
         )
     return "(unknown)"
 
@@ -686,14 +695,11 @@ def _fallback_next_question(target: dict[str, Any] | None) -> str:
             "Could you share a little more about the business so we can move on?",
         )
     if stage == "scan":
-        area = target["area"]
-        return f"Now, can you tell me about {area['audience_topic']}?"
+        return target["area"]["audience_question"]
     if stage == "branch":
-        return (
-            "Staying on that area for a moment: " + target["question_topic"]
-        )
+        return target["question"]
     if stage == "triangulate":
-        return "A reflective question. " + target["step"]["topic"]
+        return target["step"]["audience_question"]
     return "Please continue."
 
 
