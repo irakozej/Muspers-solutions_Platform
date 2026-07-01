@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Calendar, MessageSquare, CheckCircle2, AlertCircle } from 'lucide-react';
 import Reveal from '../components/Reveal';
+import RevealHeading from '../components/animations/RevealHeading';
 import { contactInfo } from '../data/site';
 import { api } from '../services/api';
 
@@ -50,12 +51,14 @@ export default function Contact() {
           <Reveal>
             <p className="eyebrow">Contact</p>
           </Reveal>
-          <Reveal delay={0.05}>
-            <h1 className="mt-6 max-w-5xl font-display text-[2.5rem] font-medium leading-[1.05] tracking-editorial sm:text-[4rem] lg:text-[5rem] text-balance">
-              Let's start a{' '}
-              <span className="italic font-light text-musper-green">conversation</span>.
-            </h1>
-          </Reveal>
+          <RevealHeading
+            as="h1"
+            delay={0.15}
+            className="mt-6 max-w-5xl font-display text-[2.5rem] font-medium leading-[1.05] tracking-editorial sm:text-[4rem] lg:text-[5rem] text-balance"
+          >
+            Let's start a{' '}
+            <span className="italic font-light text-musper-green">conversation</span>.
+          </RevealHeading>
           <Reveal delay={0.15}>
             <p className="mt-10 max-w-2xl text-lg leading-relaxed text-musper-muted text-pretty">
               For partnerships, program collaborations, or advisory engagements

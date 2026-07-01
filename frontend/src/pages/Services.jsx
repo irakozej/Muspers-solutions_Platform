@@ -2,6 +2,7 @@ import { Check, ArrowDown } from 'lucide-react';
 import Button from '../components/Button';
 import ChatCTA from '../components/ChatCTA';
 import Reveal from '../components/Reveal';
+import RevealHeading from '../components/animations/RevealHeading';
 import { services } from '../data/site';
 
 export default function Services() {
@@ -13,13 +14,15 @@ export default function Services() {
           <Reveal>
             <p className="eyebrow">Services</p>
           </Reveal>
-          <Reveal delay={0.05}>
-            <h1 className="mt-6 max-w-5xl font-display text-[2.5rem] font-medium leading-[1.05] tracking-editorial sm:text-[4rem] lg:text-[5rem] text-balance">
-              Tailored business solutions for{' '}
-              <span className="italic font-light text-musper-green">sustainable</span>{' '}
-              growth.
-            </h1>
-          </Reveal>
+          <RevealHeading
+            as="h1"
+            delay={0.15}
+            className="mt-6 max-w-5xl font-display text-[2.5rem] font-medium leading-[1.05] tracking-editorial sm:text-[4rem] lg:text-[5rem] text-balance"
+          >
+            Tailored business solutions for{' '}
+            <span className="italic font-light text-musper-green">sustainable</span>{' '}
+            growth.
+          </RevealHeading>
           <Reveal delay={0.15}>
             <div className="mt-10 grid gap-8 lg:grid-cols-12 lg:items-end">
               <p className="lg:col-span-7 text-lg leading-relaxed text-musper-muted text-pretty">

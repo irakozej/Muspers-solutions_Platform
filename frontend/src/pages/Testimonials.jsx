@@ -2,6 +2,7 @@ import { Quote } from 'lucide-react';
 import Button from '../components/Button';
 import ChatCTA from '../components/ChatCTA';
 import Reveal from '../components/Reveal';
+import RevealHeading from '../components/animations/RevealHeading';
 import { testimonials } from '../data/site';
 
 export default function Testimonials() {
@@ -15,12 +16,14 @@ export default function Testimonials() {
           <Reveal>
             <p className="eyebrow">Voices</p>
           </Reveal>
-          <Reveal delay={0.05}>
-            <h1 className="mt-6 max-w-5xl font-display text-[2.5rem] font-medium leading-[1.05] tracking-editorial sm:text-[4rem] lg:text-[5.5rem] text-balance">
-              The receipts.{' '}
-              <span className="italic font-light text-musper-green">In their words.</span>
-            </h1>
-          </Reveal>
+          <RevealHeading
+            as="h1"
+            delay={0.15}
+            className="mt-6 max-w-5xl font-display text-[2.5rem] font-medium leading-[1.05] tracking-editorial sm:text-[4rem] lg:text-[5.5rem] text-balance"
+          >
+            The receipts.{' '}
+            <span className="italic font-light text-musper-green">In their words.</span>
+          </RevealHeading>
           <Reveal delay={0.15}>
             <p className="mt-10 max-w-2xl text-lg leading-relaxed text-musper-muted text-pretty">
               We measure success in what our clients say about the work, once

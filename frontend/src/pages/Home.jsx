@@ -4,6 +4,10 @@ import { ArrowUpRight, Building2, Landmark, Users, Sparkles } from 'lucide-react
 import Button from '../components/Button';
 import ChatCTA from '../components/ChatCTA';
 import Reveal from '../components/Reveal';
+import RevealHeading from '../components/animations/RevealHeading';
+import CountUp from '../components/animations/CountUp';
+import Marquee from '../components/animations/Marquee';
+import Magnetic from '../components/animations/Magnetic';
 import {
   brand,
   contactInfo,
@@ -27,18 +31,20 @@ export default function Home() {
                 <span>Kigali · Rwanda · est. {brand.founded}</span>
               </p>
             </Reveal>
-            <Reveal delay={0.05}>
-              <h1 className="mt-6 font-display text-[2.75rem] font-medium leading-[1.02] tracking-editorial sm:text-[4rem] lg:text-[5.5rem] text-balance">
-                Equipping African businesses to{' '}
-                <span className="italic font-light text-musper-green">
-                  scale
-                </span>{' '}
-                through{' '}
-                <span className="ink-underline">strategy</span>
-                <br className="hidden sm:block" /> and{' '}
-                <span className="ink-underline">systems</span>.
-              </h1>
-            </Reveal>
+            <RevealHeading
+              as="h1"
+              delay={0.15}
+              className="mt-6 font-display text-[2.75rem] font-medium leading-[1.02] tracking-editorial sm:text-[4rem] lg:text-[5.5rem] text-balance"
+            >
+              Equipping African businesses to{' '}
+              <span className="italic font-light text-musper-green">
+                scale
+              </span>{' '}
+              through{' '}
+              <span className="ink-underline">strategy</span>
+              <br className="hidden sm:block" /> and{' '}
+              <span className="ink-underline">systems</span>.
+            </RevealHeading>
             <Reveal delay={0.15}>
               <p className="mt-8 max-w-xl text-lg leading-relaxed text-musper-muted text-pretty">
                 Musper Solutions is a Rwandan business development consultancy.
@@ -47,9 +53,11 @@ export default function Home() {
                 that move businesses from idea to investment-ready, and beyond.
               </p>
             </Reveal>
-            <Reveal delay={0.25}>
+            <Reveal delay={0.45}>
               <div className="mt-10 flex flex-wrap items-center gap-3">
-                <ChatCTA />
+                <Magnetic strength={0.22}>
+                  <ChatCTA />
+                </Magnetic>
                 <Button variant="outline" to="/services">
                   Explore our services
                 </Button>
@@ -93,7 +101,7 @@ export default function Home() {
                 className="absolute -left-4 -bottom-6 max-w-[12rem] rounded-2xl border border-musper-line bg-musper-cream-soft px-5 py-4 shadow-soft lg:-left-12 lg:-bottom-8"
               >
                 <p className="font-display text-4xl font-medium leading-none tracking-editorial text-musper-green">
-                  2000+
+                  <CountUp value="2000+" duration={2.2} />
                 </p>
                 <p className="mt-2 text-xs leading-snug text-musper-muted">
                   entrepreneurs trained across Rwanda and the region.
@@ -109,19 +117,24 @@ export default function Home() {
 
       {/* ───────────────────── TRUSTED-BY / AUDIENCES STRIP ───────────────────── */}
       <section className="border-y border-musper-line bg-musper-cream-soft/60 py-8">
-        <div className="container flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="eyebrow">Who we work with</p>
-          <ul className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm font-medium text-musper-ink/70">
-            <li>Commercial banks</li>
-            <li className="text-musper-muted-soft">·</li>
-            <li>Microfinance &amp; SACCOs</li>
-            <li className="text-musper-muted-soft">·</li>
-            <li>Development partners</li>
-            <li className="text-musper-muted-soft">·</li>
-            <li>Government institutions</li>
-            <li className="text-musper-muted-soft">·</li>
-            <li>Growth-stage SMEs</li>
-          </ul>
+        <div className="container flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:gap-8">
+          <p className="eyebrow shrink-0">Who we work with</p>
+          <Marquee duration={42} className="w-full lg:flex-1" itemGap="2.5rem">
+            {[
+              'Commercial banks',
+              'Microfinance & SACCOs',
+              'Development partners',
+              'Government institutions',
+              'Growth-stage SMEs',
+              'Foundations',
+              'Trade associations',
+            ].map((label) => (
+              <span key={label} className="flex items-center gap-8 text-sm font-medium text-musper-ink/75">
+                {label}
+                <span className="text-musper-muted-soft">·</span>
+              </span>
+            ))}
+          </Marquee>
         </div>
       </section>
 
@@ -169,7 +182,9 @@ export default function Home() {
             <Reveal key={s.label} delay={i * 0.06}>
               <div>
                 <p className="font-display text-[3.25rem] font-medium leading-none tracking-editorial text-musper-green">
-                  <span className="italic font-light">{s.value}</span>
+                  <span className="italic font-light">
+                    <CountUp value={s.value} duration={1.8 + i * 0.15} />
+                  </span>
                 </p>
                 <p className="mt-3 text-sm font-medium uppercase tracking-eyebrow text-musper-ink">
                   {s.label}

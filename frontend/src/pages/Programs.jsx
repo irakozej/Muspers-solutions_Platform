@@ -2,6 +2,7 @@ import { ArrowUpRight, Sparkles } from 'lucide-react';
 import Button from '../components/Button';
 import ChatCTA from '../components/ChatCTA';
 import Reveal from '../components/Reveal';
+import RevealHeading from '../components/animations/RevealHeading';
 import { programs, images } from '../data/site';
 
 const programImages = {
@@ -19,13 +20,15 @@ export default function Programs() {
           <Reveal>
             <p className="eyebrow">Programs</p>
           </Reveal>
-          <Reveal delay={0.05}>
-            <h1 className="mt-6 max-w-5xl font-display text-[2.5rem] font-medium leading-[1.05] tracking-editorial sm:text-[4rem] lg:text-[5.5rem] text-balance">
-              Flagship initiatives that{' '}
-              <span className="italic font-light text-musper-green">multiply</span>{' '}
-              what works.
-            </h1>
-          </Reveal>
+          <RevealHeading
+            as="h1"
+            delay={0.15}
+            className="mt-6 max-w-5xl font-display text-[2.5rem] font-medium leading-[1.05] tracking-editorial sm:text-[4rem] lg:text-[5.5rem] text-balance"
+          >
+            Flagship initiatives that{' '}
+            <span className="italic font-light text-musper-green">multiply</span>{' '}
+            what works.
+          </RevealHeading>
           <Reveal delay={0.15}>
             <p className="mt-10 max-w-2xl text-lg leading-relaxed text-musper-muted text-pretty">
               Our flagship programs strengthen entrepreneurship, help businesses

@@ -3,6 +3,8 @@ import { Quote } from 'lucide-react';
 import Button from '../components/Button';
 import ChatCTA from '../components/ChatCTA';
 import Reveal from '../components/Reveal';
+import RevealHeading from '../components/animations/RevealHeading';
+import CountUp from '../components/animations/CountUp';
 import { brand, founder, stats, values, images } from '../data/site';
 
 export default function About() {
@@ -14,14 +16,16 @@ export default function About() {
           <Reveal>
             <p className="eyebrow">About Musper</p>
           </Reveal>
-          <Reveal delay={0.05}>
-            <h1 className="mt-6 max-w-4xl font-display text-[2.5rem] font-medium leading-[1.05] tracking-editorial sm:text-[4rem] lg:text-[5rem] text-balance">
-              We exist to close the distance between{' '}
-              <span className="italic font-light text-musper-green">African potential</span>{' '}
-              and the systems it takes to{' '}
-              <span className="ink-underline">scale</span>.
-            </h1>
-          </Reveal>
+          <RevealHeading
+            as="h1"
+            delay={0.15}
+            className="mt-6 max-w-4xl font-display text-[2.5rem] font-medium leading-[1.05] tracking-editorial sm:text-[4rem] lg:text-[5rem] text-balance"
+          >
+            We exist to close the distance between{' '}
+            <span className="italic font-light text-musper-green">African potential</span>{' '}
+            and the systems it takes to{' '}
+            <span className="ink-underline">scale</span>.
+          </RevealHeading>
           <Reveal delay={0.15}>
             <p className="mt-10 max-w-2xl text-lg leading-relaxed text-musper-muted text-pretty">
               Since {brand.founded}, Musper Solutions has worked alongside
@@ -40,7 +44,9 @@ export default function About() {
             <Reveal key={s.label} delay={i * 0.06}>
               <div>
                 <p className="font-display text-[3rem] font-medium leading-none tracking-editorial text-musper-green">
-                  <span className="italic font-light">{s.value}</span>
+                  <span className="italic font-light">
+                    <CountUp value={s.value} duration={1.8 + i * 0.15} />
+                  </span>
                 </p>
                 <p className="mt-3 text-xs font-medium uppercase tracking-eyebrow text-musper-ink">
                   {s.label}
