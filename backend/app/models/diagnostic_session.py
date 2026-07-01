@@ -1,9 +1,10 @@
 import enum
 import uuid
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import DateTime, Enum, ForeignKey, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -30,6 +31,10 @@ class DiagnosticSession(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Scan, Branch, Triangulate interview state. Lives only here (Phase 4 / Part 1).
+    # Shape is documented in app.services.diagnostic_chatbot.init_state.
+    diagnostic_state: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
 
     client: Mapped["Client"] = relationship(back_populates="diagnostic_sessions")  # noqa: F821
     messages: Mapped[list["ChatMessage"]] = relationship(  # noqa: F821

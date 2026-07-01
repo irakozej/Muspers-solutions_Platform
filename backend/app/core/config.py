@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     cookie_domain: str | None = None
     cookie_secure: bool = False
 
+    # Anthropic Claude API for the diagnostic chatbot
+    anthropic_api_key: str = ""
+    claude_model: str = "claude-sonnet-4-6"
+    claude_max_tokens: int = 1024
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

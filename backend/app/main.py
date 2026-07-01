@@ -7,6 +7,7 @@ from app.api.advisor import router as advisor_router
 from app.api.auth import router as auth_router
 from app.api.client_dashboard import router as client_dashboard_router
 from app.api.contact import router as contact_router
+from app.api.diagnostic import router as diagnostic_router
 from app.api.health import router as health_router
 from app.core.config import settings
 from app.core.limiter import limiter
@@ -41,6 +42,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(advisor_router)
     app.include_router(client_dashboard_router)
+    app.include_router(diagnostic_router)
 
     return app
 
