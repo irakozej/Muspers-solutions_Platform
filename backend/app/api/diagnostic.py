@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.deps import get_current_user, require_role
+from app.core.limiter import limiter, user_or_ip_key
 from app.db.session import get_db
 from app.models.diagnostic_session import DiagnosticSession, SessionStatus
 from app.models.user import User, UserRole
@@ -58,7 +59,11 @@ def _load_session_for_user(
     response_model=DiagnosticTurnOut,
     status_code=status.HTTP_201_CREATED,
 )
+# 5 new interviews per hour per user: prevents session-spam while letting a
+# genuine client restart after a typo or an interruption.
+@limiter.limit("5/hour", key_func=user_or_ip_key)
 def start_diagnostic(
+    request: Request,
     user: User = Depends(require_role(UserRole.client)),
     db: Session = Depends(get_db),
 ) -> DiagnosticTurnOut:
@@ -73,7 +78,11 @@ def start_diagnostic(
 
 
 @router.post("/{session_id}/message", response_model=DiagnosticTurnOut)
+# 20 messages per minute per user: comfortably above human typing speed
+# (a turn every 3 seconds), well below scripted-flooding speed.
+@limiter.limit("20/minute", key_func=user_or_ip_key)
 def post_message(
+    request: Request,
     session_id: uuid.UUID,
     payload: UserMessageIn,
     user: User = Depends(require_role(UserRole.client)),

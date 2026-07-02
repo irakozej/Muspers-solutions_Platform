@@ -150,9 +150,16 @@ function DiagnosticInterview() {
       setSession((s) => ({ ...s, progress: data.progress, complete: data.is_complete }));
       setMessages((m) => [...m, data.message]);
     } catch (e) {
+      // Failed turn: remove the optimistic bubble and put the text back in the
+      // composer so retrying is a single click. Backend guarantees no state
+      // advanced on a failed call.
       setMessages((m) => m.filter((mm) => mm.id !== placeholder.id));
       setDraft(content);
-      setError(e?.message || 'The message did not go through.');
+      if (e?.status === 429) {
+        setError('You are sending messages a little too quickly. Take a breath and try again in a minute.');
+      } else {
+        setError(e?.message || 'The message did not go through. Your answer is still in the box, please send it again.');
+      }
     } finally {
       setPending(false);
     }
@@ -364,6 +371,8 @@ function Dot({ delay }) {
   );
 }
 
+const MAX_MESSAGE_CHARS = 4000; // mirrors the backend's validation limit
+
 function Composer({ draft, setDraft, onSend, disabled }) {
   const onKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -371,6 +380,7 @@ function Composer({ draft, setDraft, onSend, disabled }) {
       onSend();
     }
   };
+  const nearLimit = draft.length > MAX_MESSAGE_CHARS - 400;
   return (
     <form onSubmit={onSend} className="mt-6">
       <div className="flex items-end gap-3 rounded-3xl border border-musper-line bg-white p-3 shadow-soft focus-within:border-musper-green/40">
@@ -379,6 +389,7 @@ function Composer({ draft, setDraft, onSend, disabled }) {
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={onKeyDown}
           rows={1}
+          maxLength={MAX_MESSAGE_CHARS}
           placeholder={disabled ? 'Listening...' : 'Type your answer here'}
           className="flex-1 resize-none bg-transparent px-3 py-2 text-[0.95rem] text-musper-ink placeholder:text-musper-muted-soft focus:outline-none"
           style={{ minHeight: '2.5rem', maxHeight: '10rem' }}
@@ -392,9 +403,16 @@ function Composer({ draft, setDraft, onSend, disabled }) {
           <Send size={15} />
         </button>
       </div>
-      <p className="mt-2 px-2 text-[0.7rem] uppercase tracking-eyebrow text-musper-muted-soft">
-        Enter to send · Shift+Enter for a new line
-      </p>
+      <div className="mt-2 flex items-center justify-between px-2">
+        <p className="text-[0.7rem] uppercase tracking-eyebrow text-musper-muted-soft">
+          Enter to send · Shift+Enter for a new line
+        </p>
+        {nearLimit && (
+          <p className="text-[0.7rem] tabular-nums text-musper-orange-dark">
+            {draft.length} / {MAX_MESSAGE_CHARS}
+          </p>
+        )}
+      </div>
     </form>
   );
 }

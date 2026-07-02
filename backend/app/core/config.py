@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     claude_model: str = "claude-sonnet-4-6"
     claude_max_tokens: int = 1024
+    # Hard timeout on each Claude call so a hanging request can't freeze a worker.
+    claude_timeout_seconds: float = 45.0
+    # Cost ceiling: max user turns per interview (~3x a normal 20-turn interview).
+    # On reaching the cap the interview closes gracefully and is marked completed.
+    diagnostic_max_user_turns: int = 60
 
     @property
     def cors_origin_list(self) -> list[str]:
