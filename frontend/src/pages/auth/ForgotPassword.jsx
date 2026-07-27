@@ -46,7 +46,7 @@ export default function ForgotPassword() {
               <p className="font-medium">Reset link issued.</p>
               <p className="mt-1 text-sm text-musper-ink/80">{status.message}</p>
               <p className="mt-4 text-xs text-musper-muted">
-                In development the link is logged to the backend console, check the uvicorn output.
+                Check your inbox for an email from MusperSolutions. The link inside expires in 30 minutes and works once.
               </p>
             </div>
           </div>

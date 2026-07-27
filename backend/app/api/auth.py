@@ -144,7 +144,7 @@ def logout(
     return MessageResponse(message="Signed out")
 
 
-@router.post("/forgot-password", response_model=DevTokenResponse)
+@router.post("/forgot-password", response_model=MessageResponse)
 @limiter.limit("5/minute")
 def forgot_password(
     request: Request,
@@ -153,8 +153,8 @@ def forgot_password(
 ) -> DevTokenResponse:
     auth_service.issue_password_reset(db, email=payload.email)
     # Always respond identically, never reveal whether the email exists.
-    return DevTokenResponse(
-        message="If an account exists for that email, a reset link has been sent.",
+    return MessageResponse(
+        message="If an account exists for that email, a reset link has been sent."
     )
 
 

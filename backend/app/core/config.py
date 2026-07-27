@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     reset_token_ttl_minutes: int = 30
     verify_token_ttl_hours: int = 24
 
+    # Transactional email (Resend). If the key is unset in development, reset
+    # links fall back to the server log so local dev works without an account.
+    resend_api_key: str = ""
+    email_from: str = "MusperSolutions <onboarding@resend.dev>"
+
     # Cookies
     cookie_domain: str | None = None
     cookie_secure: bool = False

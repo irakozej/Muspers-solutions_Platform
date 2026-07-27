@@ -141,3 +141,48 @@ def test_profile_update_changes_full_name(client):
     )
     assert r2.status_code == 200, r2.text
     assert r2.json()["full_name"] == "Alice U."
+
+
+# ───────────────────── password reset email delivery ─────────────────────
+
+def test_forgot_password_sends_email_and_is_enumeration_safe(client, monkeypatch):
+    from app.services import auth as auth_svc
+    from app.services import email as email_svc
+
+    sent = []
+    monkeypatch.setattr(email_svc, "send_password_reset",
+                        lambda user, link: sent.append((user.email, link)) or "msg_1")
+    auth_svc._reset_email_log.clear()
+
+    r = client.post("/api/auth/register", json={
+        "email": "resetmail@test.musper.com", "password": "Password123!",
+        "full_name": "Reset Mail"})
+    assert r.status_code == 201
+
+    r1 = client.post("/api/auth/forgot-password", json={"email": "resetmail@test.musper.com"})
+    r2 = client.post("/api/auth/forgot-password", json={"email": "ghost-no-account@test.musper.com"})
+    # Identical response shape and message whether or not the account exists.
+    assert r1.status_code == r2.status_code == 200
+    assert r1.json()["message"] == r2.json()["message"]
+    # Email sent for the real account only, with a tokenised link; token never in response.
+    assert len(sent) == 1 and "/reset-password?token=" in sent[0][1]
+    assert "token" not in str(r1.json())
+
+
+def test_forgot_password_per_email_throttle(client, monkeypatch):
+    from app.services import auth as auth_svc
+    from app.services import email as email_svc
+
+    sent = []
+    monkeypatch.setattr(email_svc, "send_password_reset",
+                        lambda user, link: sent.append(1) or "msg")
+    auth_svc._reset_email_log.clear()
+
+    client.post("/api/auth/register", json={
+        "email": "throttle@test.musper.com", "password": "Password123!",
+        "full_name": "Throttle"})
+    for _ in range(5):
+        r = client.post("/api/auth/forgot-password", json={"email": "throttle@test.musper.com"})
+        assert r.status_code == 200  # response never changes
+    # Only the first 3 within the hour actually send an email.
+    assert len(sent) == 3

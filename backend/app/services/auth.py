@@ -164,9 +164,40 @@ def revoke_refresh_token(db: Session, *, raw_token: str) -> None:
 
 # ───────────────────── password reset & verification ─────────────────────
 
+# Per-email throttle: max 3 reset emails per address per hour, on top of the
+# per-IP slowapi limit on the endpoint. In-memory, same scope as the limiter
+# (fine for single-process; move to Redis alongside it for multi-worker).
+_RESET_EMAIL_WINDOW_SECONDS = 3600
+_RESET_EMAIL_MAX_PER_WINDOW = 3
+_reset_email_log: dict[str, list[float]] = {}
+
+
+def _reset_email_throttled(email: str) -> bool:
+    import time
+
+    now = time.monotonic()
+    stamps = [t for t in _reset_email_log.get(email, []) if now - t < _RESET_EMAIL_WINDOW_SECONDS]
+    if len(stamps) >= _RESET_EMAIL_MAX_PER_WINDOW:
+        _reset_email_log[email] = stamps
+        return True
+    stamps.append(now)
+    _reset_email_log[email] = stamps
+    return False
+
+
 def issue_password_reset(db: Session, *, email: str) -> None:
-    """Always returns silently, never reveal whether an email exists."""
-    user = db.scalar(select(User).where(User.email == email.lower().strip()))
+    """Always returns silently, never reveal whether an email exists.
+
+    Delivery: sends a branded reset email via Resend. In development with no
+    RESEND_API_KEY, falls back to logging the link so local flows still work.
+    Send failures are swallowed (logged by type in the email service) so the
+    response stays identical either way, preserving enumeration safety.
+    """
+    normalized = email.lower().strip()
+    if _reset_email_throttled(normalized):
+        return  # same silent response; prevents email flooding per address
+
+    user = db.scalar(select(User).where(User.email == normalized))
     if user is None:
         return
 
@@ -175,9 +206,21 @@ def issue_password_reset(db: Session, *, email: str) -> None:
     user.reset_token_expires_at = reset_token_expiry()
     db.add(user)
     db.commit()
-    _log_dev_link(
-        purpose="Password reset", email=user.email, token=raw, path="/reset-password"
-    )
+
+    reset_link = f"{settings.frontend_url.rstrip('/')}/reset-password?token={raw}"
+    from app.services import email as email_svc
+
+    try:
+        message_id = email_svc.send_password_reset(user, reset_link)
+    except Exception:
+        # Already logged by type inside the email service. Never re-raise:
+        # the caller's response must not change based on delivery outcome.
+        return
+    if message_id is None and settings.is_dev and not settings.resend_api_key:
+        # Dev-only fallback so the flow is testable without a Resend account.
+        _log_dev_link(
+            purpose="Password reset", email=user.email, token=raw, path="/reset-password"
+        )
 
 
 def consume_password_reset(db: Session, *, token: str, new_password: str) -> User:
