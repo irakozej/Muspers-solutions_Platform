@@ -1,16 +1,16 @@
-// Musper Solutions, content data extracted from the existing site
+// MusperSolutions, content data extracted from the existing site
 // (reference/muspersolutions.com/index.html). Tweak copy here, not in components.
 
 export const brand = {
-  name: 'Musper Solutions',
-  legalName: 'Musper Solutions Ltd',
+  name: 'MusperSolutions',
+  legalName: 'MusperSolutions Ltd',
   tagline: 'Equipping businesses to scale through strategy and systems.',
   location: 'Kigali, Rwanda',
   founded: 2011,
 };
 
 export const contactInfo = {
-  email: 'muspersolutions@musper.com',
+  email: 'info@muspersolutions.com',
   phone: '+250 788 300 840',
   whatsapp: 'https://api.whatsapp.com/send/?phone=250788300840',
   address: {
@@ -166,7 +166,7 @@ export const programs = [
 export const testimonials = [
   {
     quote:
-      'Musper Solutions provided practical guidance that helped us improve how we manage our business operations and plan for growth. Their approach is professional and very supportive to entrepreneurs.',
+      'MusperSolutions provided practical guidance that helped us improve how we manage our business operations and plan for growth. Their approach is professional and very supportive to entrepreneurs.',
     name: 'SME Entrepreneur',
     role: 'Entrepreneur support engagement',
   },
@@ -178,7 +178,7 @@ export const testimonials = [
   },
   {
     quote:
-      'The training and mentorship we received strengthened our understanding of business development and market opportunities. Musper Solutions is truly committed to supporting entrepreneurs.',
+      'The training and mentorship we received strengthened our understanding of business development and market opportunities. MusperSolutions is truly committed to supporting entrepreneurs.',
     name: 'Startup Founder',
     role: 'Capacity-building cohort',
   },
@@ -225,14 +225,14 @@ export const audiences = [
 ];
 
 export const founder = {
-  name: 'Penny Burabyo Musoni',
+  name: 'MusperSolutions Advisory',
   role: 'Founder & Chief Executive',
   blurb:
-    'Penny founded Musper Solutions to close the gap she kept seeing between high-potential African entrepreneurs and the systems, advisory, and capital they needed to scale.',
+    'MusperSolutions exists to close the gap between high-potential African entrepreneurs and the systems, advisory, and capital they need to scale.',
   bio: [
-    'Over 15+ years of practice across private-sector development, Penny has worked with banks, MFIs, development partners, government institutions, and hundreds of SMEs, from informal traders earning their first profits to growing companies preparing for investment.',
-    'Her approach is grounded and practical: she pairs globally recognized methodologies (including ILO\'s Start and Improve Your Business) with deep local context, then stays close to the work until results show up on a balance sheet.',
-    'Through Musper, she has trained 2000+ entrepreneurs, designed SME programs for financial institutions, and advised development partners on the design of entrepreneurship initiatives across the region.',
+    'Over 15+ years of practice across private-sector development, MusperSolutions has worked with banks, MFIs, development partners, government institutions, and hundreds of SMEs, from informal traders earning their first profits to growing companies preparing for investment.',
+    'The approach is grounded and practical: globally recognized methodologies (including ILO\'s Start and Improve Your Business) paired with deep local context, staying close to the work until results show up on a balance sheet.',
+    'The team has trained 2000+ entrepreneurs, designed SME programs for financial institutions, and advised development partners on the design of entrepreneurship initiatives across the region.',
   ],
 };
 

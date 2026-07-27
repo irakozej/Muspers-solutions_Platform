@@ -26,7 +26,7 @@ export default function ClientOverview() {
       <PageHeading
         eyebrow="Your dashboard"
         title={`Hello, ${firstName}.`}
-        description={overview?.business_name ? `${overview.business_name} · ${overview.sector || 'Sector unspecified'}` : 'Your Musper workspace.'}
+        description={overview?.business_name ? `${overview.business_name} · ${overview.sector || 'Sector unspecified'}` : 'Your MusperSolutions workspace.'}
         action={
           <Link
             to="/diagnostic"

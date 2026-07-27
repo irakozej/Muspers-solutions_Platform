@@ -56,7 +56,7 @@ export default function DashboardLayout({ role }) {
             <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-musper-orange" />
           </span>
           <span className="font-display text-base font-semibold tracking-editorial">
-            Musper {role === 'advisor' ? 'Advisor' : 'Client'}
+            MusperSolutions {role === 'advisor' ? 'Advisor' : 'Client'}
           </span>
         </Link>
         <button
@@ -78,7 +78,7 @@ export default function DashboardLayout({ role }) {
             </span>
             <div className="leading-tight">
               <p className="font-display text-base font-semibold tracking-editorial text-musper-ink">
-                Musper Solutions
+                MusperSolutions
               </p>
               <p className="text-[0.65rem] uppercase tracking-eyebrow text-musper-muted">
                 {role === 'advisor' ? 'Advisor workspace' : 'Client dashboard'}

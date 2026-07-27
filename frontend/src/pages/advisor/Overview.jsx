@@ -20,7 +20,7 @@ export default function AdvisorOverview() {
     advisorApi.stats().then(setStats).catch((e) => setError(e.message));
   }, []);
 
-  const firstName = user?.full_name?.split(' ')[0] || 'Penny';
+  const firstName = user?.full_name?.split(' ')[0] || 'MusperSolutions';
 
   return (
     <div className="space-y-12">

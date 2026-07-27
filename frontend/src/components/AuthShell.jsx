@@ -22,7 +22,7 @@ export default function AuthShell({ eyebrow, title, accent, children, footer }) 
               <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-musper-orange" />
             </span>
             <span className="font-display text-xl font-semibold tracking-editorial text-musper-cream">
-              Musper Solutions
+              MusperSolutions
             </span>
           </Link>
 

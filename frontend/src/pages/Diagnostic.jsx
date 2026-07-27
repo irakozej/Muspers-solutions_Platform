@@ -33,8 +33,8 @@ function SignedOutScreen() {
         Sign in to start your diagnostic.
       </h1>
       <p className="mt-6 max-w-xl text-base leading-relaxed text-musper-muted">
-        The Musper diagnostic is a guided fifteen to twenty minute conversation.
-        We ask a few structured questions and the report goes to Penny first.
+        The MusperSolutions diagnostic is a guided fifteen to twenty minute conversation.
+        We ask a few structured questions and the report goes to MusperSolutions first.
       </p>
       <div className="mt-8 flex flex-wrap gap-3">
         <Link
@@ -175,7 +175,7 @@ function DiagnosticInterview() {
         </h1>
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-musper-muted">
           We'll ask short, plain questions about how the business is really doing.
-          Nothing fancy. The report goes to Penny first, who decides what to share back with you.
+          Nothing fancy. The report goes to MusperSolutions first, who decides what to share back with you.
           Find a quiet moment, this works best in one sitting.
         </p>
         {error && <ErrorBox message={error} />}
@@ -216,8 +216,8 @@ function DiagnosticInterview() {
           Thank you, your diagnostic is complete.
         </h1>
         <p className="mt-6 max-w-xl text-base leading-relaxed text-musper-muted">
-          Penny will personally review your responses and put together a report.
-          You'll see it on your dashboard once she's shared it with you.
+          MusperSolutions will personally review your responses and put together a report.
+          You'll see it on your dashboard once it has been shared with you.
         </p>
         <div className="mt-10 flex flex-wrap gap-3">
           <button

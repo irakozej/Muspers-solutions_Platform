@@ -41,7 +41,7 @@ export default function Navbar() {
             <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-musper-orange" />
           </span>
           <span className="font-display text-lg font-semibold tracking-editorial text-musper-ink">
-            Musper <span className="text-musper-muted-soft">Solutions</span>
+            MusperSolutions
           </span>
         </Link>
 

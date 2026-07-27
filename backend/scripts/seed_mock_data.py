@@ -46,7 +46,7 @@ def _utc(year: int, month: int, day: int) -> datetime:
 # ───────────────────── chat template ─────────────────────
 
 QUESTIONS = [
-    "Welcome to your Musper diagnostic. To start, give me your business in two sentences.",
+    "Welcome to your MusperSolutions diagnostic. To start, give me your business in two sentences.",
     "Walk me through how you bring in revenue today, what are the main streams?",
     "Where do new customers come from for you right now?",
     "When something goes wrong in delivery or production, how do you find out?",
@@ -87,7 +87,7 @@ CLIENTS = [
         "business_size": BusinessSize.medium,
         "employee_count": 45,
         "founded_year": 2014,
-        "revenue_band": "200M–500M RWF",
+        "revenue_band": "200M-500M RWF",
         "revenue_trend": [
             {"period": "Q1 '24", "revenue_mrwf": 150},
             {"period": "Q2 '24", "revenue_mrwf": 165},
@@ -103,7 +103,7 @@ CLIENTS = [
             "Our production manager flags it on the floor, and we have a daily morning huddle. Bigger quality issues come back through the supermarkets within a week.",
             "Yes, we have a monthly cash flow but it's mostly historical. Forward visibility is maybe 30 days.",
             "I'm the CEO, my brother handles operations, we have a finance lead, a production manager, a sales lead, and 40 production staff. The production team has a lot of turnover.",
-            "Talent. We're losing skilled production line workers every 6–9 months and it's slowing our quality consistency.",
+            "Talent. We're losing skilled production line workers every 6-9 months and it's slowing our quality consistency.",
         ],
         "scores": {"strategy": 72, "customers": 68, "money": 75, "operations": 82, "talent": 55},
         "summary": (
@@ -151,7 +151,7 @@ CLIENTS = [
         "business_size": BusinessSize.small,
         "employee_count": 18,
         "founded_year": 2017,
-        "revenue_band": "50M–200M RWF",
+        "revenue_band": "50M-200M RWF",
         "revenue_trend": [
             {"period": "Q1 '24", "revenue_mrwf": 60},
             {"period": "Q2 '24", "revenue_mrwf": 50},
@@ -164,8 +164,8 @@ CLIENTS = [
             "Karame is a specialty coffee exporter, we source from 200+ smallholder farmers around Huye, mill, and export green beans, mostly to European roasters.",
             "Pretty much all export sales to European specialty roasters. About 80% to three German roasters and 20% to a UK partner.",
             "Mostly trade shows and roaster referrals. One of our German buyers has introduced us to three new roasters this year.",
-            "Quality complaints come from buyers via email, usually 4–6 weeks after shipment. By then we can't trace it back to a specific lot easily.",
-            "Honestly no, our money is locked up in the harvest cycle. Between buying cherries and getting paid by exporters, we go 4–5 months out of pocket.",
+            "Quality complaints come from buyers via email, usually 4-6 weeks after shipment. By then we can't trace it back to a specific lot easily.",
+            "Honestly no, our money is locked up in the harvest cycle. Between buying cherries and getting paid by exporters, we go 4-5 months out of pocket.",
             "Me, my co-founder (head of sourcing), a milling supervisor, an export logistics person, two field officers, and the rest are mill workers seasonal.",
             "Working capital. I cannot say yes to bigger contracts because I can't fund the cherry purchase up front.",
         ],
@@ -176,7 +176,7 @@ CLIENTS = [
             "Without these fixes, growth opportunities will keep getting turned down."
         ),
         "red_flags": [
-            "Cash flow gaps between cherry purchase and export payment (4–5 months)",
+            "Cash flow gaps between cherry purchase and export payment (4-5 months)",
             "No formal pricing model, margins eroded by FX volatility",
         ],
         "priority_actions": [
@@ -214,7 +214,7 @@ CLIENTS = [
         "business_size": BusinessSize.medium,
         "employee_count": 68,
         "founded_year": 2011,
-        "revenue_band": "200M–500M RWF",
+        "revenue_band": "200M-500M RWF",
         "revenue_trend": [
             {"period": "Q1 '24", "revenue_mrwf": 120},
             {"period": "Q2 '24", "revenue_mrwf": 145},
@@ -274,7 +274,7 @@ CLIENTS = [
         "business_size": BusinessSize.small,
         "employee_count": 12,
         "founded_year": 2019,
-        "revenue_band": "20M–50M RWF",
+        "revenue_band": "20M-50M RWF",
         "revenue_trend": [
             {"period": "Q1 '24", "revenue_mrwf": 25},
             {"period": "Q2 '24", "revenue_mrwf": 30},
@@ -385,7 +385,7 @@ CLIENTS = [
             "Pricing handicraft products fairly",
         ],
         "is_shared": True,
-        "rating": (5, "She made it feel doable. We've already opened the bank account."),
+        "rating": (5, "They made it feel doable. We've already opened the bank account."),
         "session_completed_days_ago": 22,
         "advisor_notes": [
             "Refer Solange to the next SIYB cohort, perfect fit.",
@@ -401,7 +401,7 @@ CLIENTS = [
         "business_size": BusinessSize.small,
         "employee_count": 22,
         "founded_year": 2018,
-        "revenue_band": "50M–200M RWF",
+        "revenue_band": "50M-200M RWF",
         "revenue_trend": [
             {"period": "Q1 '24", "revenue_mrwf": 60},
             {"period": "Q2 '24", "revenue_mrwf": 75},
@@ -461,7 +461,7 @@ CLIENTS = [
         "business_size": BusinessSize.medium,
         "employee_count": 52,
         "founded_year": 2015,
-        "revenue_band": "200M–500M RWF",
+        "revenue_band": "200M-500M RWF",
         "revenue_trend": [
             {"period": "Q1 '24", "revenue_mrwf": 180},
             {"period": "Q2 '24", "revenue_mrwf": 175},
@@ -484,7 +484,7 @@ CLIENTS = [
             "Mostly wholesale to distributors in Rwanda, Uganda, and Burundi. About 75/25 split between Rwanda and exports.",
         ],
         "advisor_notes": [
-            "Penny started the session yesterday; Eric requested a pause to gather financials before the deep dive.",
+            "MusperSolutions started the session yesterday; Eric requested a pause to gather financials before the deep dive.",
         ],
     },
     {
@@ -496,7 +496,7 @@ CLIENTS = [
         "business_size": BusinessSize.small,
         "employee_count": 15,
         "founded_year": 2016,
-        "revenue_band": "50M–200M RWF",
+        "revenue_band": "50M-200M RWF",
         "revenue_trend": [
             {"period": "Q1 '24", "revenue_mrwf": 80},
             {"period": "Q2 '24", "revenue_mrwf": 60},
@@ -564,7 +564,7 @@ def main() -> int:
         if demo_users:
             print(f"  cleared {len(demo_users)} previous demo users")
 
-        # Find Penny (advisor), required for notes.
+        # Find MusperSolutions (advisor), required for notes.
         advisor = db.scalar(select(User).where(User.role == UserRole.advisor))
         if advisor is None:
             print("✗  No advisor user found. Run `python -m scripts.seed_advisor` first.")
@@ -685,7 +685,7 @@ def main() -> int:
                         )
                     )
 
-            # Advisor notes (Penny's private notes)
+            # Advisor notes (MusperSolutions' private notes)
             for i, note in enumerate(c.get("advisor_notes", [])):
                 db.add(
                     AdvisorNote(

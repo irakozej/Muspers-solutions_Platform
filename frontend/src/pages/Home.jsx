@@ -47,7 +47,7 @@ export default function Home() {
             </RevealHeading>
             <Reveal delay={0.15}>
               <p className="mt-8 max-w-xl text-lg leading-relaxed text-musper-muted text-pretty">
-                Musper Solutions is a Rwandan business development consultancy.
+                MusperSolutions is a Rwandan business development consultancy.
                 We partner with entrepreneurs, financial institutions, and
                 development partners to build the strategies, systems, and skills
                 that move businesses from idea to investment-ready, and beyond.
@@ -161,13 +161,13 @@ export default function Home() {
                 entrepreneurs and institutions exactly where they are.
               </p>
               <p className="mt-6 text-lg leading-relaxed text-musper-muted text-pretty">
-                Founded by Penny Burabyo Musoni in {brand.founded}, Musper has grown into
+                Founded by MusperSolutions Advisory in {brand.founded}, MusperSolutions has grown into
                 a trusted partner for the institutions shaping Rwanda's
                 entrepreneurship ecosystem, and a steady hand for the founders
                 building inside it.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button variant="outline" to="/about">About Musper</Button>
+                <Button variant="outline" to="/about">About MusperSolutions</Button>
                 <Button variant="ghost" to="/about" icon={ArrowUpRight}>Meet the founder</Button>
               </div>
             </Reveal>
@@ -260,7 +260,7 @@ export default function Home() {
             </Reveal>
             <Reveal delay={0.1}>
               <p className="text-base leading-relaxed text-musper-cream/70 lg:max-w-md lg:justify-self-end">
-                At Musper, we design and run initiatives that strengthen
+                At MusperSolutions, we design and run initiatives that strengthen
                 entrepreneurship, help businesses grow, and open up economic
                 opportunity across Rwanda and the region.
               </p>
@@ -390,7 +390,7 @@ export default function Home() {
                     </Button>
                   </div>
                   <p className="mt-6 text-sm text-musper-cream/55">
-                    Or reach Penny directly on{' '}
+                    Or reach MusperSolutions directly on{' '}
                     <a className="underline decoration-musper-orange/60 underline-offset-4 hover:text-musper-cream" href={`tel:${contactInfo.phone.replace(/\s/g, '')}`}>{contactInfo.phone}</a>.
                   </p>
                 </Reveal>

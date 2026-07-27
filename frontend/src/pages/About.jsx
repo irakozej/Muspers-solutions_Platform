@@ -14,7 +14,7 @@ export default function About() {
       <section className="pt-24 pb-20 lg:pt-32 lg:pb-24">
         <div className="container">
           <Reveal>
-            <p className="eyebrow">About Musper</p>
+            <p className="eyebrow">About MusperSolutions</p>
           </Reveal>
           <RevealHeading
             as="h1"
@@ -28,7 +28,7 @@ export default function About() {
           </RevealHeading>
           <Reveal delay={0.15}>
             <p className="mt-10 max-w-2xl text-lg leading-relaxed text-musper-muted text-pretty">
-              Since {brand.founded}, Musper Solutions has worked alongside
+              Since {brand.founded}, MusperSolutions has worked alongside
               founders, financial institutions, and development partners, building
               the strategies, training, and systems that turn ambition into
               durable, profitable, locally-owned businesses.
@@ -102,7 +102,7 @@ export default function About() {
                 ))}
               </div>
               <div className="mt-10 flex flex-wrap gap-3">
-                <Button to="/contact">Get in touch with Penny</Button>
+                <Button to="/contact">Get in touch with MusperSolutions</Button>
                 <ChatCTA />
               </div>
             </Reveal>
@@ -176,7 +176,7 @@ export default function About() {
             <div className="lg:col-span-7 lg:col-start-6">
               <Reveal delay={0.1}>
                 <p className="text-lg leading-relaxed text-musper-muted text-pretty">
-                  Musper draws on a network of senior advisors, certified
+                  MusperSolutions draws on a network of senior advisors, certified
                   trainers, and sector specialists, assembled per engagement
                   to match the brief. We're building out the public team page;
                   in the meantime, the easiest way to meet us is to start a

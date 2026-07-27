@@ -1,6 +1,6 @@
-# Musper Solutions Platform
+# MusperSolutions Platform
 
-Custom platform for **Musper Solutions Ltd**, a business consultancy in Kigali, Rwanda.
+Custom platform for **MusperSolutions Ltd**, a business consultancy in Kigali, Rwanda.
 The repo holds the public website, the advisor and client dashboards, JWT auth,
 the Hatana-style diagnostic report (with PDF export), and the seed scripts that
 populate demo data for the dashboards.
@@ -110,7 +110,7 @@ npm install                   # first time only
 npm run dev
 ```
 
-Open <http://localhost:5173>, you should see the Musper Solutions placeholder
+Open <http://localhost:5173>, you should see the MusperSolutions placeholder
 homepage with brand colors, Navbar, and Footer.
 
 ---
@@ -122,7 +122,7 @@ homepage with brand colors, Navbar, and Footer.
 - [ ] `docker exec musper-postgres psql -U musper -d musper -c '\dt'` lists 7 tables
       (`users`, `clients`, `diagnostic_sessions`, `chat_messages`, `reports`,
       `ratings`, `alembic_version`)
-- [ ] <http://localhost:5173> renders the homepage with Musper green/orange branding
+- [ ] <http://localhost:5173> renders the homepage with MusperSolutions green/orange branding
 
 ---
 

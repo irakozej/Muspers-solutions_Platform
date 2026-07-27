@@ -26,7 +26,7 @@ export default function ClientReports() {
         <EmptyState
           icon={FileText}
           title="No shared reports yet."
-          body="When Penny shares a diagnostic report with you, it will appear here."
+          body="When MusperSolutions shares a diagnostic report with you, it will appear here."
           action={
             <Link
               to="/diagnostic"

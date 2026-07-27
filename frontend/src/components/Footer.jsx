@@ -28,7 +28,7 @@ export default function Footer() {
               <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-musper-orange" />
             </span>
             <span className="font-display text-2xl font-semibold tracking-editorial text-musper-cream">
-              Musper Solutions
+              MusperSolutions
             </span>
           </div>
           <p className="mt-8 max-w-md font-display text-2xl leading-tight tracking-editorial text-musper-cream/90 text-balance">

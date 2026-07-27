@@ -1,9 +1,9 @@
 """Scoring helpers for the Hatana-style diagnostic.
 
-Five GROW domains, each 0–100. Two composite headline scores:
+Five GROW domains, each 0-100. Two composite headline scores:
   - GROW Overall         = simple mean across all five domains
   - Finance Readiness    = weighted toward Money + Operations + Strategy
-Bands: A ≥ 80 · B 60–79 · C < 60.
+Bands: A ≥ 80 · B 60-79 · C < 60.
 """
 from __future__ import annotations
 

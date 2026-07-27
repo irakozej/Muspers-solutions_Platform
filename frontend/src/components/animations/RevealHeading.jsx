@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 // Walks the React tree recursively: string children get split into words and
 // each word is wrapped in a `motion.span` that fades + slides + un-blurs on
 // mount. Non-string children (spans, breaks, italic accents) keep their
-// styling — their inner text is what gets word-split.
+// styling, their inner text is what gets word-split.
 //
 // Stagger ~55ms per word feels alive without dragging. Words use a single
 // spring-like easing so the line settles together.

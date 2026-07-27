@@ -1,4 +1,4 @@
-"""Create / reset Penny's advisor account.
+"""Create / reset MusperSolutions' advisor account.
 
 Idempotent: re-running it forces the account back to the documented state,
 INCLUDING the password. That makes this script a reliable "reset advisor login"
@@ -31,7 +31,7 @@ from app.models.user import User, UserRole  # noqa: E402
 
 ADVISOR_EMAIL = "penny@muspersolutions.com"
 ADVISOR_PASSWORD = os.environ.get("ADVISOR_SEED_PASSWORD", "ChangeMe2026!")
-ADVISOR_FULL_NAME = "Penny Burabyo Musoni"
+ADVISOR_FULL_NAME = "MusperSolutions Advisory"
 
 
 def main() -> int:

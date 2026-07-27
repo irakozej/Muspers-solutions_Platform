@@ -51,7 +51,7 @@ export default function ClientProfile() {
       <PageHeading
         eyebrow="Profile"
         title="Your business + account."
-        description="Keep your business profile current, it's what Penny sees when she pulls up your case."
+        description="Keep your business profile current, it's what the MusperSolutions team sees when reviewing your case."
       />
 
       <div className="grid gap-8 lg:grid-cols-2">

@@ -160,7 +160,7 @@ export default function Contact() {
             <Reveal delay={0.1}>
               <div className="mt-10 overflow-hidden rounded-[2rem] border border-musper-line shadow-soft">
                 <iframe
-                  title="Musper Solutions office, Kigali, Rwanda"
+                  title="MusperSolutions office, Kigali, Rwanda"
                   src="https://www.google.com/maps?q=Nyarugenge,Kigali,Rwanda&z=14&output=embed"
                   width="100%"
                   height="320"

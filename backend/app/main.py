@@ -20,9 +20,9 @@ except ImportError:  # pragma: no cover
 
 def create_app() -> FastAPI:
     app = FastAPI(
-        title="Musper Solutions API",
+        title="MusperSolutions API",
         version="0.1.0",
-        description="Backend API for the Musper Solutions platform.",
+        description="Backend API for the MusperSolutions platform.",
     )
 
     app.state.limiter = limiter
