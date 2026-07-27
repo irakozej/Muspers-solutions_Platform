@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,6 +11,17 @@ class Settings(BaseSettings):
     database_url: str = Field(
         default="postgresql+psycopg://musper:musper@localhost:5434/musper"
     )
+
+    @field_validator("database_url")
+    @classmethod
+    def _normalize_database_url(cls, v: str) -> str:
+        # Managed hosts (Render, Heroku) hand out postgres:// or postgresql://
+        # URLs; SQLAlchemy needs the psycopg3 driver spelled out.
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql+psycopg://", 1)
+        if v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+psycopg://", 1)
+        return v
 
     frontend_url: str = "http://localhost:5173"
     cors_origins: str = "http://localhost:5173"
@@ -28,9 +39,12 @@ class Settings(BaseSettings):
     resend_api_key: str = ""
     email_from: str = "MusperSolutions <onboarding@resend.dev>"
 
-    # Cookies
+    # Cookies. samesite stays "lax" when frontend and API share an origin
+    # (dev proxy, or a static-site proxy in production); set "none" only for a
+    # true cross-site deployment on one parent domain (requires secure=true).
     cookie_domain: str | None = None
     cookie_secure: bool = False
+    cookie_samesite: str = "lax"
 
     # Anthropic Claude API for the diagnostic chatbot
     anthropic_api_key: str = ""

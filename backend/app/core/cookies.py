@@ -29,7 +29,7 @@ def set_auth_cookies(
         max_age=max_age,
         httponly=True,
         secure=settings.cookie_secure,
-        samesite="lax",
+        samesite=settings.cookie_samesite,
         path="/",
         domain=settings.cookie_domain or None,
     )
@@ -40,7 +40,7 @@ def set_auth_cookies(
         max_age=max_age,
         httponly=False,
         secure=settings.cookie_secure,
-        samesite="lax",
+        samesite=settings.cookie_samesite,
         path="/",
         domain=settings.cookie_domain or None,
     )
@@ -54,5 +54,5 @@ def clear_auth_cookies(response: Response) -> None:
             domain=settings.cookie_domain or None,
             secure=settings.cookie_secure,
             httponly=key == REFRESH_COOKIE,
-            samesite="lax",
+            samesite=settings.cookie_samesite,
         )

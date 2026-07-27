@@ -1,0 +1,77 @@
+# Render Blueprint for the MusperSolutions platform.
+# Apply via Render Dashboard → Blueprints → New Blueprint Instance, or create
+# the three services manually with the same settings.
+#
+# Architecture: the static site proxies /api/* and /health to the backend via
+# rewrite rules, so the browser sees a single origin. That keeps the HTTP-only
+# refresh cookie (SameSite=Lax) and the CSRF double-submit cookie working
+# exactly as they do behind the Vite dev proxy. No CORS or cookie changes needed.
+
+databases:
+  - name: musper-db
+    plan: free
+    databaseName: musper
+    user: musper
+
+services:
+  # ── Backend API (FastAPI) ────────────────────────────────────────────
+  - type: web
+    name: musper-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: uv sync --frozen
+    # Free tier has no pre-deploy step, so migrations run at boot before uvicorn.
+    startCommand: >-
+      uv run alembic upgrade head &&
+      uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
+      --forwarded-allow-ips '*'
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: musper-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: FRONTEND_URL
+        value: https://musper-web.onrender.com # ← set to the real static site URL
+      - key: CORS_ORIGINS
+        value: https://musper-web.onrender.com # ← same as FRONTEND_URL
+      - key: ANTHROPIC_API_KEY
+        sync: false # secret — paste in the dashboard, never in this file
+      - key: RESEND_API_KEY
+        sync: false # secret — paste in the dashboard, never in this file
+      - key: EMAIL_FROM
+        value: MusperSolutions <onboarding@resend.dev>
+      - key: CLAUDE_MODEL
+        value: claude-sonnet-4-6
+
+  # ── Frontend (React/Vite static site) ────────────────────────────────
+  - type: web
+    name: musper-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Empty on purpose: API calls stay same-origin and hit the rewrites below.
+      - key: VITE_API_URL
+        value: ""
+    routes:
+      # Order matters: proxy API traffic to the backend, then SPA fallback.
+      - type: rewrite
+        source: /api/*
+        destination: https://musper-api.onrender.com/api/*
+      - type: rewrite
+        source: /health
+        destination: https://musper-api.onrender.com/health
+      - type: rewrite
+        source: /*
+        destination: /index.html
