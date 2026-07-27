@@ -190,12 +190,20 @@ def client_detail(db: Session, client_id: uuid.UUID) -> dict | None:
 
     sessions = sorted(client.diagnostic_sessions, key=lambda s: s.started_at, reverse=True)
     latest = sessions[0] if sessions else None
+    # Surface the newest report across ALL sessions, so a fresh report on an
+    # older completed interview isn't hidden behind a newer empty session.
     latest_report = None
-    if latest and latest.reports:
-        latest_report = max(latest.reports, key=lambda r: r.created_at)
+    report_session = None
+    for s in sessions:
+        if s.reports:
+            r = max(s.reports, key=lambda rr: rr.created_at)
+            if latest_report is None or r.created_at > latest_report.created_at:
+                latest_report, report_session = r, s
 
-    transcript = sorted(latest.messages, key=lambda m: m.created_at) if latest else []
-    rating = latest.ratings[0] if latest and latest.ratings else None
+    # Show the transcript belonging to the reported interview when one exists.
+    focus = report_session or latest
+    transcript = sorted(focus.messages, key=lambda m: m.created_at) if focus else []
+    rating = focus.ratings[0] if focus and focus.ratings else None
 
     return {
         "id": client.id,
@@ -211,7 +219,7 @@ def client_detail(db: Session, client_id: uuid.UUID) -> dict | None:
         "contact_name": client.user.full_name if client.user else None,
         "created_at": client.created_at,
         "sessions": [_session_summary(s) for s in sessions],
-        "latest_report": _report_payload(latest_report, session_id=latest.id) if latest_report else None,
+        "latest_report": _report_payload(latest_report, session_id=report_session.id, include_rationales=True) if latest_report else None,
         "transcript": transcript,
         "rating": rating,
         "notes": client.advisor_notes,
@@ -234,12 +242,23 @@ def _session_summary(session: DiagnosticSession) -> dict:
     }
 
 
-def _report_payload(report: Report, *, session_id: uuid.UUID) -> dict:
+def _report_payload(
+    report: Report, *, session_id: uuid.UUID, include_rationales: bool = False
+) -> dict:
+    """Materialise a report for the API.
+
+    include_rationales must be True only for advisor-facing callers. The scan
+    rationales are the interviewer's private scoring notes and must never reach
+    the client side, even though the client UI hides them.
+    """
     scores = report.scores_json or {}
     content = report.content_json or {}
-    return {
+    payload = {
         "id": report.id,
         "session_id": session_id,
+        # Legacy (Hatana-model) fields. For root-cause reports, grow_overall
+        # carries the scan aggregate so list views and stats stay meaningful.
+        "report_type": content.get("report_type") or scores.get("report_type") or "hatana",
         "headline": {
             "grow_overall": float(scores.get("grow_overall", 0)),
             "grow_band": scores.get("grow_band", band_for(scores.get("grow_overall"))),
@@ -262,6 +281,21 @@ def _report_payload(report: Report, *, session_id: uuid.UUID) -> dict:
         "is_shared": bool(report.is_shared),
         "created_at": report.created_at,
     }
+    # Root-cause (MusperSolutions' framework) sections, present only on new reports.
+    if payload["report_type"] == "root_cause":
+        scan = scores.get("scan") or {}
+        if not include_rationales:
+            # Strip the private scoring notes for any non-advisor caller.
+            scan = {
+                k: {kk: vv for kk, vv in (v or {}).items() if kk != "rationale"}
+                for k, v in scan.items()
+            }
+        payload["scan_results"] = scan
+        payload["snapshot"] = content.get("snapshot") or {}
+        payload["diagnosis"] = content.get("diagnosis") or {}
+        payload["service_pathway"] = content.get("service_pathway") or []
+        payload["engagement"] = content.get("engagement") or {}
+    return payload
 
 
 # ───────────────────── advisor: analytics ─────────────────────

@@ -67,9 +67,16 @@ class HeadlineScores(BaseModel):
 
 
 class ReportPayload(BaseModel):
-    """Materialised report = headline + per-domain + qualitative content."""
+    """Materialised report. Two shapes share this payload:
+
+    - "hatana" (Phase 6 mock model): headline + domains + red_flags etc.
+    - "root_cause" (MusperSolutions' real framework, Phase 4 Part 2): scan_results,
+      diagnosis, service_pathway, engagement. The headline block still carries
+      the scan aggregate so list views work identically for both.
+    """
     id: uuid.UUID
     session_id: uuid.UUID
+    report_type: str = "hatana"
     headline: HeadlineScores
     domains: DomainScores
     summary: str | None = None
@@ -78,6 +85,12 @@ class ReportPayload(BaseModel):
     suggested_topics: list[str] = []
     is_shared: bool
     created_at: datetime
+    # Root-cause sections (None/absent on legacy reports)
+    scan_results: dict[str, Any] | None = None
+    snapshot: dict[str, Any] | None = None
+    diagnosis: dict[str, Any] | None = None
+    service_pathway: list[dict[str, Any]] | None = None
+    engagement: dict[str, Any] | None = None
 
 
 # ───────────────────── advisor responses ─────────────────────

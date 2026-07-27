@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     claude_max_tokens: int = 1024
     # Hard timeout on each Claude call so a hanging request can't freeze a worker.
     claude_timeout_seconds: float = 45.0
+    # Report generation is a single bigger call: more output room, longer timeout.
+    claude_report_max_tokens: int = 3000
+    claude_report_timeout_seconds: float = 120.0
     # Cost ceiling: max user turns per interview (~3x a normal 20-turn interview).
     # On reaching the cap the interview closes gracefully and is marked completed.
     diagnostic_max_user_turns: int = 60

@@ -1,14 +1,18 @@
-"""Diagnostic chatbot endpoints. Client-only (logged-in clients drive the
-interview from the /diagnostic page in the frontend)."""
+"""Diagnostic chatbot endpoints.
+
+The interview endpoints are client-only (logged-in clients drive the interview
+from the /diagnostic page). Report generation is advisor-only; it also fires
+automatically in the background the moment an interview completes.
+"""
 from __future__ import annotations
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from app.core.deps import get_current_user, require_role
+from app.core.deps import get_current_user, require_csrf, require_role
 from app.core.limiter import limiter, user_or_ip_key
 from app.db.session import get_db
 from app.models.diagnostic_session import DiagnosticSession, SessionStatus
@@ -21,6 +25,7 @@ from app.schemas.diagnostic import (
 )
 from app.services import dashboard as dash_svc
 from app.services import diagnostic_chatbot as chatbot
+from app.services import report_generator
 
 router = APIRouter(prefix="/api/diagnostic", tags=["diagnostic"])
 
@@ -85,6 +90,7 @@ def post_message(
     request: Request,
     session_id: uuid.UUID,
     payload: UserMessageIn,
+    background_tasks: BackgroundTasks,
     user: User = Depends(require_role(UserRole.client)),
     db: Session = Depends(get_db),
 ) -> DiagnosticTurnOut:
@@ -92,12 +98,41 @@ def post_message(
     _, assistant_msg, is_complete = chatbot.submit_user_message(
         db, session=session, content=payload.content
     )
+    if is_complete:
+        # Auto-generate MusperSolutions' report in the background so it is waiting in
+        # her dashboard, without delaying the client's completion screen.
+        background_tasks.add_task(report_generator.generate_report_for_session, session.id)
     return DiagnosticTurnOut(
         session_id=session.id,
         message=ChatMessageOut.model_validate(assistant_msg),
         is_complete=is_complete,
         progress=chatbot.session_progress(session.diagnostic_state),
     )
+
+
+@router.post("/{session_id}/generate-report")
+# 10/hour: report generation is the most expensive single call in the system.
+# Advisor-only, so this is a cost guard rather than an abuse guard.
+@limiter.limit("10/hour", key_func=user_or_ip_key)
+def generate_report(
+    request: Request,
+    session_id: uuid.UUID,
+    user: User = Depends(require_role(UserRole.advisor)),
+    db: Session = Depends(get_db),
+    _csrf: None = Depends(require_csrf),
+) -> dict:
+    """Generate or regenerate the Root-Cause Diagnostic Report for a completed
+    session. Regeneration overwrites the analysis but preserves the report's
+    is_shared flag."""
+    session = db.scalar(
+        select(DiagnosticSession)
+        .options(selectinload(DiagnosticSession.messages))
+        .where(DiagnosticSession.id == session_id)
+    )
+    if session is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Session not found")
+    report = report_generator.generate_report(db, session)
+    return dash_svc._report_payload(report, session_id=session.id, include_rationales=True)
 
 
 @router.get("/{session_id}", response_model=DiagnosticSessionDetail)

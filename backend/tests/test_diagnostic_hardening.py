@@ -121,7 +121,7 @@ def test_turn_cap_closes_gracefully_without_calling_claude(client, monkeypatch):
     assert r.status_code == 200
     body = r.json()
     assert body["is_complete"] is True
-    assert "Penny" in body["message"]["content"]
+    assert "MusperSolutions" in body["message"]["content"]
 
     # Session is completed; further messages are rejected.
     r = client.get(f"/api/diagnostic/{sid}", headers=_auth(token))
@@ -225,3 +225,38 @@ def test_rate_limit_keys_are_per_user_not_shared(client, monkeypatch):
         assert client.post("/api/diagnostic/start", headers=_auth(token_b)).status_code == 201
     finally:
         limiter.enabled = False
+
+
+# ───────────────────── rationale leak (audit finding) ─────────────────────
+
+def test_client_report_payload_excludes_rationales_advisor_includes():
+    """Scan rationales are the interviewer's private scoring notes. They must
+    reach the advisor payload but never the client payload, even though the
+    client UI hides them."""
+    from types import SimpleNamespace
+    from datetime import datetime, timezone
+    from app.services import dashboard as dash
+
+    fake = SimpleNamespace(
+        id=uuid.uuid4(),
+        is_shared=True,
+        created_at=datetime.now(timezone.utc),
+        scores_json={
+            "report_type": "root_cause",
+            "scan": {"A": {"name": "Strategic Clarity", "score": 2,
+                           "rationale": "PRIVATE: weak strategy signals"}},
+            "grow_overall": 40, "grow_band": "C",
+            "finance_readiness": 40, "finance_band": "C",
+        },
+        content_json={"report_type": "root_cause", "summary": "s",
+                      "diagnosis": {}, "service_pathway": [], "engagement": {},
+                      "snapshot": {}},
+    )
+    sid = uuid.uuid4()
+
+    client_view = dash._report_payload(fake, session_id=sid)
+    advisor_view = dash._report_payload(fake, session_id=sid, include_rationales=True)
+
+    assert "rationale" not in client_view["scan_results"]["A"], "leak: client sees rationale"
+    assert client_view["scan_results"]["A"]["score"] == 2  # score still shown
+    assert advisor_view["scan_results"]["A"]["rationale"] == "PRIVATE: weak strategy signals"

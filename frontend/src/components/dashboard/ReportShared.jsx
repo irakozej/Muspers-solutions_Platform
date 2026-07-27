@@ -78,8 +78,213 @@ export function StatTile({ label, value, detail, accent }) {
   );
 }
 
-export function ReportCard({ report }) {
+// Scan bar for MusperSolutions' root-cause framework: 1-5 scale, band-coloured.
+function ScanGauge({ areaKey, name, score, rationale, showRationale }) {
+  const s = score ?? 0;
+  const pct = Math.max(0, Math.min(100, (s / 5) * 100));
+  const tone = s >= 4 ? 'bg-musper-green' : s === 3 ? 'bg-musper-green-mid' : 'bg-musper-orange';
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-sm font-medium tracking-tight text-musper-ink">
+          <span className="mr-1.5 font-mono text-xs text-musper-muted-soft">{areaKey}</span>
+          {name}
+        </p>
+        <p className="font-mono text-xs text-musper-muted">
+          <span className="font-display text-lg font-medium italic text-musper-ink">
+            {score ?? '-'}
+          </span>
+          <span className="ml-0.5">/5</span>
+        </p>
+      </div>
+      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-musper-line">
+        <div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
+      </div>
+      {showRationale && rationale && (
+        <p className="mt-2 text-xs leading-relaxed text-musper-muted">{rationale}</p>
+      )}
+    </div>
+  );
+}
+
+const SCAN_ORDER = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+// MusperSolutions' Root-Cause Diagnostic Report layout.
+// showRationales: true for the advisor view only; clients never see scoring notes.
+function RootCauseReport({ report, showRationales = false }) {
+  const snapshot = report.snapshot || {};
+  const scan = report.scan_results || {};
+  const diagnosis = report.diagnosis || {};
+  const pathway = report.service_pathway || [];
+  const engagement = report.engagement || {};
+
+  const snapshotRows = [
+    ['Company', snapshot.company_name],
+    ['Sector', snapshot.sector],
+    ['Years in operation', snapshot.years_in_operation],
+    ['Team size', snapshot.team_size],
+    ['Revenue / budget range', snapshot.revenue_range],
+    ['Diagnostic date', report.created_at
+      ? new Date(report.created_at).toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' })
+      : null],
+    ['Completed by', snapshot.person_name
+      ? `${snapshot.person_name}${snapshot.person_role ? `, ${snapshot.person_role}` : ''}`
+      : null],
+  ].filter(([, v]) => v);
+
+  return (
+    <article className="rounded-[2rem] border border-musper-line bg-musper-cream-soft/70 p-7 sm:p-10">
+      <header>
+        <p className="eyebrow">Root-cause diagnostic report</p>
+        <h2 className="mt-4 font-display text-3xl leading-tight tracking-editorial sm:text-4xl text-balance">
+          {report.summary || 'What is actually going on.'}
+        </h2>
+      </header>
+
+      {/* 1 · Company snapshot */}
+      <section className="mt-10">
+        <p className="text-xs uppercase tracking-eyebrow text-musper-muted">Company snapshot</p>
+        <div className="mt-4 grid gap-px overflow-hidden rounded-2xl border border-musper-line bg-musper-line sm:grid-cols-2">
+          {snapshotRows.map(([label, value]) => (
+            <div key={label} className="bg-white px-4 py-3">
+              <p className="text-[0.65rem] uppercase tracking-eyebrow text-musper-muted">{label}</p>
+              <p className="mt-1 text-sm font-medium text-musper-ink">{value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 2 · Scan results */}
+      <section className="mt-10">
+        <p className="text-xs uppercase tracking-eyebrow text-musper-muted">
+          Scan results <span className="normal-case tracking-tight">(1 = critical gap, 5 = strong)</span>
+        </p>
+        <div className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          {SCAN_ORDER.map((k) => scan[k] && (
+            <ScanGauge
+              key={k}
+              areaKey={k}
+              name={scan[k].name}
+              score={scan[k].score}
+              rationale={scan[k].rationale}
+              showRationale={showRationales}
+            />
+          ))}
+        </div>
+      </section>
+
+      {/* 3 · Diagnosis: presenting problem vs root cause (the visual heart) */}
+      <section className="mt-10">
+        <p className="text-xs uppercase tracking-eyebrow text-musper-muted">Diagnosis</p>
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="rounded-2xl border border-musper-line bg-white p-6">
+            <p className="text-xs uppercase tracking-eyebrow text-musper-muted-soft">
+              The presenting problem
+            </p>
+            <p className="mt-1 text-[0.7rem] text-musper-muted-soft">What the client says is wrong</p>
+            <p className="mt-4 text-[0.95rem] leading-relaxed text-musper-ink/85">
+              {diagnosis.presenting_problem}
+            </p>
+          </div>
+          <div className="relative rounded-2xl border-2 border-musper-green bg-musper-green-soft p-6">
+            <span className="absolute -top-3 left-5 rounded-full bg-musper-green px-3 py-1 text-[0.65rem] font-medium uppercase tracking-eyebrow text-musper-cream">
+              The root cause
+            </span>
+            <p className="mt-1 text-[0.7rem] text-musper-green">What the diagnostic actually reveals</p>
+            <p className="mt-4 text-[0.95rem] font-medium leading-relaxed text-musper-ink">
+              {diagnosis.root_cause}
+            </p>
+            {diagnosis.root_cause_evidence?.length > 0 && (
+              <ul className="mt-5 space-y-2 border-t border-musper-green/20 pt-4">
+                {diagnosis.root_cause_evidence.map((e, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs leading-relaxed text-musper-ink/80">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-musper-orange" />
+                    {e}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* What's been tried + ownership */}
+      <section className="mt-8 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-musper-line bg-white p-6">
+          <p className="text-xs uppercase tracking-eyebrow text-musper-muted">
+            What has already been tried
+          </p>
+          <ul className="mt-4 space-y-4">
+            {(diagnosis.already_tried || []).map((t, i) => (
+              <li key={i}>
+                <p className="text-sm font-medium text-musper-ink">{t.attempt}</p>
+                <p className="mt-1 text-xs leading-relaxed text-musper-muted">
+                  Why it did not work: {t.why_it_failed}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="rounded-2xl border border-musper-line bg-white p-6">
+          <p className="text-xs uppercase tracking-eyebrow text-musper-muted">
+            Who owns this internally
+          </p>
+          <p className="mt-4 text-sm leading-relaxed text-musper-ink/85">{diagnosis.ownership}</p>
+        </div>
+      </section>
+
+      {/* 4 · Service pathway */}
+      {pathway.length > 0 && (
+        <section className="mt-10">
+          <p className="text-xs uppercase tracking-eyebrow text-musper-green">
+            Recommended service pathway
+            <span className="ml-2 normal-case tracking-tight text-musper-muted">(matched to the root cause)</span>
+          </p>
+          <ol className="mt-5 space-y-4">
+            {pathway.map((p, i) => (
+              <li key={i} className="rounded-2xl border border-musper-line bg-white p-5">
+                <div className="flex items-start gap-4">
+                  <span className="pt-0.5 font-mono text-xs text-musper-muted">0{i + 1}</span>
+                  <div>
+                    <p className="font-display text-lg leading-tight tracking-editorial">{p.service}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-musper-muted">{p.justification}</p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {/* 5 · Engagement recommendation */}
+      <section className="mt-10 rounded-2xl border border-musper-green/15 bg-musper-green-soft p-6">
+        <p className="text-xs uppercase tracking-eyebrow text-musper-green">Engagement recommendation</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <EngRow label="Engagement type" value={engagement.type_label || engagement.type} />
+          <EngRow label="Estimated timeline" value={engagement.timeline} />
+          <EngRow label="Estimated investment" value={engagement.investment_range} />
+          <EngRow label="Next step" value={engagement.next_step} />
+        </div>
+      </section>
+    </article>
+  );
+}
+
+function EngRow({ label, value }) {
+  if (!value) return null;
+  return (
+    <div className="rounded-xl bg-white/70 px-4 py-3">
+      <p className="text-[0.65rem] uppercase tracking-eyebrow text-musper-muted">{label}</p>
+      <p className="mt-1 text-sm leading-relaxed text-musper-ink/90">{value}</p>
+    </div>
+  );
+}
+
+export function ReportCard({ report, showRationales = false }) {
   if (!report) return null;
+  if (report.report_type === 'root_cause') {
+    return <RootCauseReport report={report} showRationales={showRationales} />;
+  }
   const { headline, domains, summary, red_flags, priority_actions, suggested_topics } = report;
 
   return (
@@ -232,7 +437,7 @@ export function ChatTranscript({ messages }) {
           <div key={m.id} className={isAssistant ? '' : 'pl-6 sm:pl-10'}>
             <div className="mb-1 flex items-center gap-2 text-xs uppercase tracking-eyebrow">
               <span className={isAssistant ? 'text-musper-green' : 'text-musper-orange'}>
-                {isAssistant ? 'Musper' : 'Client'}
+                {isAssistant ? 'MusperSolutions' : 'Client'}
               </span>
               <span className="text-musper-muted-soft">
                 {new Date(m.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}

@@ -108,7 +108,7 @@ BAND_TONE_COLOR = {
 MUSPER = {
     "address": "KN 12, Nyarugenge, Kigali, Rwanda",
     "phone": "+250 788 300 840",
-    "email": "muspersolutions@musper.com",
+    "email": "info@muspersolutions.com",
 }
 
 
@@ -399,7 +399,12 @@ def _styles() -> dict[str, ParagraphStyle]:
 
 
 def _draw_cover(
-    canvas, doc, *, client: dict, issued_date: str, report_ref: str
+    canvas, doc, *, client: dict, issued_date: str, report_ref: str,
+    eyebrow_text: str = "INTEGRATED  DIAGNOSTIC  REPORT",
+    title_lines: tuple[str, str] = (
+        "Where the business stands today,",
+        "and the moves that matter next.",
+    ),
 ) -> None:
     w, h = A4
     serif = _font("Fraunces", "Times-Roman")
@@ -432,7 +437,7 @@ def _draw_cover(
     # Wordmark text
     canvas.setFillColor(CREAM)
     canvas.setFont(serif, 14)
-    canvas.drawString(badge_x + 24, badge_y + 4, "Musper Solutions")
+    canvas.drawString(badge_x + 24, badge_y + 4, "MusperSolutions")
 
     # Eyebrow
     eyebrow_y = h - 110 * mm
@@ -440,15 +445,11 @@ def _draw_cover(
     canvas.circle(24 * mm, eyebrow_y + 3, 1.4, stroke=0, fill=1)
     canvas.setFillColor(ORANGE)
     canvas.setFont(sans_b, 8)
-    canvas.drawString(28 * mm, eyebrow_y, "INTEGRATED  DIAGNOSTIC  REPORT")
+    canvas.drawString(28 * mm, eyebrow_y, eyebrow_text)
 
     # Title
     canvas.setFillColor(CREAM)
     canvas.setFont(serif, 32)
-    title_lines = [
-        "Where the business stands today,",
-        "and the moves that matter next.",
-    ]
     ty = eyebrow_y - 18
     for line in title_lines:
         ty -= 34
@@ -538,8 +539,20 @@ def render_report_pdf(
     main_frame = Frame(frame_x, frame_y, frame_w, frame_h, id="main", showBoundary=0)
     empty_frame = Frame(0, 0, page_w, page_h, id="cover", showBoundary=0)
 
+    is_root_cause = (report.get("report_type") == "root_cause")
+
     def on_cover(c, d):
-        _draw_cover(c, d, client=client, issued_date=issued_date, report_ref=report_ref)
+        if is_root_cause:
+            _draw_cover(
+                c, d, client=client, issued_date=issued_date, report_ref=report_ref,
+                eyebrow_text="ROOT-CAUSE  DIAGNOSTIC  REPORT",
+                title_lines=(
+                    "What is actually going on,",
+                    "and the treatment that fits it.",
+                ),
+            )
+        else:
+            _draw_cover(c, d, client=client, issued_date=issued_date, report_ref=report_ref)
 
     def on_main(c, d):
         _draw_main_chrome(c, d, business_name=business_name)
@@ -547,8 +560,8 @@ def render_report_pdf(
     doc = BaseDocTemplate(
         buffer,
         pagesize=A4,
-        title=f"Musper Diagnostic Report, {business_name}",
-        author="Musper Solutions",
+        title=f"MusperSolutions Diagnostic Report, {business_name}",
+        author="MusperSolutions",
         subject="Integrated Diagnostic Report",
         leftMargin=margin,
         rightMargin=margin,
@@ -569,75 +582,16 @@ def render_report_pdf(
     flow.append(NextPageTemplate("main"))
     flow.append(PageBreak())
 
-    # ── Business snapshot section ─────────────────────────────
-    flow.append(_section_eyebrow_title("Business snapshot", "The business at a glance.", styles))
-    flow.append(_snapshot_table(client, styles, frame_w))
-    flow.append(Spacer(0, 12))
-
-    # Revenue trend
-    if client.get("revenue_trend"):
-        flow.append(_revenue_card(client["revenue_trend"], styles, frame_w))
-        flow.append(Spacer(0, 16))
-
-    # ── Headline scores ─────────────────────────────
-    flow.append(_section_eyebrow_title("Headline scores", "The numbers, in two views.", styles))
-    flow.append(_headline_table(report.get("headline", {}), styles, frame_w))
-    flow.append(Spacer(0, 18))
-
-    # ── Domain breakdown (next page) ─────────────────────────────
-    flow.append(PageBreak())
-    flow.append(_section_eyebrow_title(
-        "Domain breakdown", "Where the business is strong, where it is stretched.", styles,
-    ))
-    for d in DOMAIN_ORDER:
-        s = float(report.get("domains", {}).get(d, 0))
-        flow.append(DomainBar(frame_w, DOMAIN_LABELS[d], s))
-        flow.append(Spacer(0, 8))
-    flow.append(Spacer(0, 8))
-
-    # ── Summary ─────────────────────────────
-    if report.get("summary"):
-        flow.append(_section_eyebrow_title("Summary", "The picture, in plain language.", styles))
-        flow.append(_summary_card(report["summary"], styles, frame_w))
-        flow.append(Spacer(0, 18))
-
-    # ── Red flags (next page) ─────────────────────────────
-    red_flags = report.get("red_flags") or []
-    if red_flags:
-        flow.append(PageBreak())
-        flow.append(_section_eyebrow_title(
-            "Red flags", "Issues worth surfacing now.", styles, eyebrow_color=ORANGE,
-        ))
-        for f in red_flags:
-            flow.append(_flag_box(f, styles, frame_w))
-            flow.append(Spacer(0, 8))
-        flow.append(Spacer(0, 10))
-
-    # ── Priority actions ─────────────────────────────
-    actions = report.get("priority_actions") or []
-    if actions:
-        flow.append(_section_eyebrow_title(
-            "Priority actions", "What to do in the next 90 days.", styles,
-        ))
-        for i, a in enumerate(actions, 1):
-            flow.append(_action_block(i, a, styles, frame_w))
-            flow.append(Spacer(0, 10))
-        flow.append(Spacer(0, 8))
-
-    # ── Coaching topics ─────────────────────────────
-    topics = report.get("suggested_topics") or []
-    if topics:
-        flow.append(_section_eyebrow_title(
-            "Suggested coaching topics", "Where Musper can go deeper.", styles,
-        ))
-        flow.append(_pill_row(topics, styles, frame_w))
-        flow.append(Spacer(0, 18))
+    if is_root_cause:
+        _append_root_cause_flow(flow, client=client, report=report, styles=styles, frame_w=frame_w)
+    else:
+        _append_hatana_flow(flow, client=client, report=report, styles=styles, frame_w=frame_w)
 
     # ── Closing footer line ─────────────────────────────
     flow.append(HRule(frame_w))
     flow.append(Spacer(0, 6))
     closing = (
-        f"<b>Musper Solutions Ltd.</b> &nbsp;·&nbsp; {MUSPER['address']} &nbsp;·&nbsp; "
+        f"<b>MusperSolutions Ltd.</b> &nbsp;·&nbsp; {MUSPER['address']} &nbsp;·&nbsp; "
         f"{MUSPER['phone']} &nbsp;·&nbsp; {MUSPER['email']}<br/>"
         f"This report was prepared confidentially for {business_name} on {issued_date}. "
         "Please do not share without consent."
@@ -650,6 +604,278 @@ def render_report_pdf(
     date_slug = issued_dt.strftime("%Y-%m-%d")
     filename = f"Musper_Diagnostic_{business_slug}_{date_slug}.pdf"
     return buffer.getvalue(), filename
+
+
+# ───────────────────── flow builders (one per report shape) ─────────────────────
+
+
+def _append_hatana_flow(
+    flow: list[Any], *, client: dict, report: dict, styles: dict, frame_w: float
+) -> None:
+    """The Phase 6 mock-model layout (headline scores + 0-100 domains)."""
+    flow.append(_section_eyebrow_title("Business snapshot", "The business at a glance.", styles))
+    flow.append(_snapshot_table(client, styles, frame_w))
+    flow.append(Spacer(0, 12))
+
+    if client.get("revenue_trend"):
+        flow.append(_revenue_card(client["revenue_trend"], styles, frame_w))
+        flow.append(Spacer(0, 16))
+
+    flow.append(_section_eyebrow_title("Headline scores", "The numbers, in two views.", styles))
+    flow.append(_headline_table(report.get("headline", {}), styles, frame_w))
+    flow.append(Spacer(0, 18))
+
+    flow.append(PageBreak())
+    flow.append(_section_eyebrow_title(
+        "Domain breakdown", "Where the business is strong, where it is stretched.", styles,
+    ))
+    for d in DOMAIN_ORDER:
+        s = float(report.get("domains", {}).get(d, 0))
+        flow.append(DomainBar(frame_w, DOMAIN_LABELS[d], s))
+        flow.append(Spacer(0, 8))
+    flow.append(Spacer(0, 8))
+
+    if report.get("summary"):
+        flow.append(_section_eyebrow_title("Summary", "The picture, in plain language.", styles))
+        flow.append(_summary_card(report["summary"], styles, frame_w))
+        flow.append(Spacer(0, 18))
+
+    red_flags = report.get("red_flags") or []
+    if red_flags:
+        flow.append(PageBreak())
+        flow.append(_section_eyebrow_title(
+            "Red flags", "Issues worth surfacing now.", styles, eyebrow_color=ORANGE,
+        ))
+        for f in red_flags:
+            flow.append(_flag_box(f, styles, frame_w))
+            flow.append(Spacer(0, 8))
+        flow.append(Spacer(0, 10))
+
+    actions = report.get("priority_actions") or []
+    if actions:
+        flow.append(_section_eyebrow_title(
+            "Priority actions", "What to do in the next 90 days.", styles,
+        ))
+        for i, a in enumerate(actions, 1):
+            flow.append(_action_block(i, a, styles, frame_w))
+            flow.append(Spacer(0, 10))
+        flow.append(Spacer(0, 8))
+
+    topics = report.get("suggested_topics") or []
+    if topics:
+        flow.append(_section_eyebrow_title(
+            "Suggested coaching topics", "Where MusperSolutions can go deeper.", styles,
+        ))
+        flow.append(_pill_row(topics, styles, frame_w))
+        flow.append(Spacer(0, 18))
+
+
+class ScanBar(Flowable):
+    """Root-cause scan row: '[A] Strategic Clarity' + n/5 + band-coloured bar."""
+
+    HEIGHT = 22
+
+    def __init__(self, width: float, area_key: str, label: str, score: int | None):
+        super().__init__()
+        self.width = width
+        self.area_key = area_key
+        self.label = label
+        self.score = score
+
+    def wrap(self, _aw: float, _ah: float):
+        return self.width, self.HEIGHT
+
+    def draw(self) -> None:
+        c = self.canv
+        sans = _font("Geist", "Helvetica")
+        sans_b = _font("Geist-Bold", "Helvetica-Bold")
+        serif = _font("Fraunces", "Times-Roman")
+        c.setFillColor(MUTED_SOFT)
+        c.setFont(sans, 8)
+        c.drawString(0, 14, self.area_key)
+        c.setFillColor(INK)
+        c.setFont(sans_b, 9.5)
+        c.drawString(14, 14, self.label)
+        score_text = str(self.score) if self.score is not None else "-"
+        c.setFillColor(INK)
+        c.setFont(serif, 12)
+        c.drawRightString(self.width - 20, 14, score_text)
+        c.setFillColor(MUTED)
+        c.setFont(sans, 8)
+        c.drawRightString(self.width, 14, " / 5")
+        # Bar
+        bar_y, bar_h = 4, 4
+        c.setFillColor(LINE)
+        c.roundRect(0, bar_y, self.width, bar_h, bar_h / 2, stroke=0, fill=1)
+        s = self.score or 0
+        if s > 0:
+            tone = GREEN if s >= 4 else (GREEN_MID if s == 3 else ORANGE)
+            c.setFillColor(tone)
+            c.roundRect(
+                0, bar_y, max(bar_h, self.width * (s / 5.0)), bar_h, bar_h / 2, stroke=0, fill=1
+            )
+
+
+def _rc_kv_table(rows: list[tuple[str, str]], styles: dict, frame_w: float) -> Table:
+    """Two-column label/value grid used for snapshot + engagement sections."""
+    cells = []
+    for label, value in rows:
+        cells.append([
+            Paragraph(label.upper(), styles["label"]),
+            Paragraph(value or "-", styles["body"]),
+        ])
+    t = Table(cells, colWidths=[frame_w * 0.32, frame_w * 0.68])
+    t.setStyle(TableStyle([
+        ("LINEBELOW", (0, 0), (-1, -2), 0.4, LINE),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ("TOPPADDING", (0, 0), (-1, -1), 7),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]))
+    return t
+
+
+def _rc_labeled_box(
+    label: str, body_text: str, styles: dict, frame_w: float,
+    *, bg: Color, label_color: Color, left_bar: Color | None = None,
+    body_style: str = "body",
+) -> Table:
+    label_style = ParagraphStyle(
+        f"RcLabel-{label}", parent=styles["label"], textColor=label_color
+    )
+    inner = [
+        [Paragraph(label.upper(), label_style)],
+        [Paragraph(body_text, styles[body_style])],
+    ]
+    t = Table(inner, colWidths=[frame_w - 32])
+    style = [
+        ("BACKGROUND", (0, 0), (-1, -1), bg),
+        ("BOX", (0, 0), (-1, -1), 0.5, LINE),
+        ("LEFTPADDING", (0, 0), (-1, -1), 16),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 16),
+        ("TOPPADDING", (0, 0), (-1, 0), 12),
+        ("BOTTOMPADDING", (0, 0), (-1, 0), 4),
+        ("TOPPADDING", (0, 1), (-1, 1), 0),
+        ("BOTTOMPADDING", (0, 1), (-1, 1), 12),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+    ]
+    if left_bar is not None:
+        style.append(("LINEBEFORE", (0, 0), (0, -1), 2.5, left_bar))
+    t.setStyle(TableStyle(style))
+    return t
+
+
+def _append_root_cause_flow(
+    flow: list[Any], *, client: dict, report: dict, styles: dict, frame_w: float
+) -> None:
+    """MusperSolutions' Root-Cause Diagnostic Report layout."""
+    snapshot = report.get("snapshot") or {}
+    scan = report.get("scan_results") or {}
+    diagnosis = report.get("diagnosis") or {}
+    pathway = report.get("service_pathway") or []
+    engagement = report.get("engagement") or {}
+
+    # ── 1 · Company snapshot ─────────────────────────────
+    flow.append(_section_eyebrow_title("Company snapshot", "The business at a glance.", styles))
+    completed_by = snapshot.get("person_name") or "-"
+    if snapshot.get("person_role"):
+        completed_by = f"{completed_by}, {snapshot['person_role']}"
+    issued = report.get("created_at")
+    issued_str = _format_date(issued) if isinstance(issued, datetime) else (str(issued)[:10] if issued else "-")
+    flow.append(_rc_kv_table([
+        ("Company", snapshot.get("company_name") or client.get("business_name") or "-"),
+        ("Sector", snapshot.get("sector") or "-"),
+        ("Years in operation", snapshot.get("years_in_operation") or "-"),
+        ("Team size", snapshot.get("team_size") or "-"),
+        ("Revenue / budget range", snapshot.get("revenue_range") or "-"),
+        ("Date of diagnostic", issued_str),
+        ("Completed by", completed_by),
+    ], styles, frame_w))
+    flow.append(Spacer(0, 16))
+
+    # ── 2 · Scan results ─────────────────────────────
+    flow.append(_section_eyebrow_title(
+        "Scan results", "Six areas, scored 1 (critical gap) to 5 (strong).", styles,
+    ))
+    for key in ("A", "B", "C", "D", "E", "F"):
+        area = scan.get(key) or {}
+        flow.append(ScanBar(frame_w, key, area.get("name", key), area.get("score")))
+        flow.append(Spacer(0, 8))
+    flow.append(Spacer(0, 10))
+
+    # ── 3 · Diagnosis (new page: the heart of the report) ─────────────────────
+    flow.append(PageBreak())
+    flow.append(_section_eyebrow_title(
+        "Diagnosis", "The presenting problem, and what is actually going on.", styles,
+    ))
+    if diagnosis.get("presenting_problem"):
+        flow.append(_rc_labeled_box(
+            "The presenting problem  ·  what the client says is wrong",
+            diagnosis["presenting_problem"], styles, frame_w,
+            bg=CREAM_SOFT, label_color=MUTED,
+        ))
+        flow.append(Spacer(0, 10))
+    if diagnosis.get("root_cause"):
+        flow.append(_rc_labeled_box(
+            "The root cause  ·  what the diagnostic actually reveals",
+            diagnosis["root_cause"], styles, frame_w,
+            bg=GREEN_SOFT, label_color=GREEN, left_bar=GREEN, body_style="summary",
+        ))
+        flow.append(Spacer(0, 8))
+    evidence = diagnosis.get("root_cause_evidence") or []
+    if evidence:
+        for e in evidence:
+            flow.append(_flag_box(e, styles, frame_w))
+            flow.append(Spacer(0, 6))
+    flow.append(Spacer(0, 10))
+
+    tried = diagnosis.get("already_tried") or []
+    if tried:
+        flow.append(_section_eyebrow_title(
+            "What has already been tried", "And why it did not work.", styles,
+        ))
+        for i, t in enumerate(tried, 1):
+            flow.append(_action_block(i, {
+                "title": t.get("attempt", ""),
+                "detail": f"Why it did not work: {t.get('why_it_failed', '')}",
+            }, styles, frame_w))
+            flow.append(Spacer(0, 8))
+        flow.append(Spacer(0, 8))
+
+    if diagnosis.get("ownership"):
+        flow.append(_section_eyebrow_title("Who owns this internally", "Felt by, fixed by.", styles))
+        flow.append(_rc_labeled_box(
+            "Ownership", diagnosis["ownership"], styles, frame_w,
+            bg=CREAM_SOFT, label_color=MUTED,
+        ))
+        flow.append(Spacer(0, 14))
+
+    # ── 4 · Service pathway ─────────────────────────────
+    if pathway:
+        flow.append(PageBreak())
+        flow.append(_section_eyebrow_title(
+            "Recommended service pathway", "Matched to the root cause, not the symptom.", styles,
+        ))
+        for i, p in enumerate(pathway, 1):
+            flow.append(_action_block(i, {
+                "title": p.get("service", ""),
+                "detail": p.get("justification", ""),
+            }, styles, frame_w))
+            flow.append(Spacer(0, 10))
+        flow.append(Spacer(0, 8))
+
+    # ── 5 · Engagement recommendation ─────────────────────────────
+    flow.append(_section_eyebrow_title(
+        "Engagement recommendation", "How MusperSolutions proposes to work on this.", styles,
+    ))
+    flow.append(_rc_kv_table([
+        ("Engagement type", engagement.get("type_label") or engagement.get("type") or "-"),
+        ("Estimated timeline", engagement.get("timeline") or "-"),
+        ("Estimated investment", engagement.get("investment_range") or "-"),
+        ("Next step", engagement.get("next_step") or "-"),
+    ], styles, frame_w))
+    flow.append(Spacer(0, 18))
 
 
 # ───────────────────── small builders ─────────────────────
@@ -854,7 +1080,7 @@ def _action_block(num: int, a: dict, styles: dict, frame_w: float) -> KeepTogeth
                 Paragraph(a.get("title", ""), styles["action-title"]),
             ]
         ],
-        colWidths=[24, frame_w - 24 - 28],
+        colWidths=[24, frame_w - 56 - 24],
     )
     head.setStyle(TableStyle([
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
@@ -867,7 +1093,7 @@ def _action_block(num: int, a: dict, styles: dict, frame_w: float) -> KeepTogeth
     rows: list[Any] = [head]
     if a.get("detail"):
         d = Paragraph(a["detail"], styles["action-detail"])
-        d_wrap = Table([[d]], colWidths=[frame_w - 28])
+        d_wrap = Table([[d]], colWidths=[frame_w - 56])
         d_wrap.setStyle(TableStyle([
             ("LEFTPADDING", (0, 0), (-1, -1), 24),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),
@@ -889,7 +1115,7 @@ def _action_block(num: int, a: dict, styles: dict, frame_w: float) -> KeepTogeth
                 f'<b><font color="#161616">{a["horizon"]}</font></b>'
             )
         meta = Paragraph("&nbsp;&nbsp;&nbsp;&nbsp;".join(meta_html), styles["action-meta"])
-        m_wrap = Table([[meta]], colWidths=[frame_w - 28])
+        m_wrap = Table([[meta]], colWidths=[frame_w - 56])
         m_wrap.setStyle(TableStyle([
             ("LEFTPADDING", (0, 0), (-1, -1), 24),
             ("RIGHTPADDING", (0, 0), (-1, -1), 0),

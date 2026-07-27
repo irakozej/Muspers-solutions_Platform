@@ -4,7 +4,7 @@ import {
   LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid,
 } from 'recharts';
 import {
-  ArrowLeft, Share2, FileDown, MessageSquare, Star, Mail, MapPin, Users as UsersIcon, Calendar,
+  ArrowLeft, Share2, FileDown, MessageSquare, Star, Mail, MapPin, Users as UsersIcon, Calendar, RefreshCw,
 } from 'lucide-react';
 import { advisorApi } from '../../services/dashboard';
 import {
@@ -25,6 +25,7 @@ export default function ClientDetail() {
   const [shareBusy, setShareBusy] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [pdfError, setPdfError] = useState(null);
+  const [genBusy, setGenBusy] = useState(false);
 
   const load = () =>
     advisorApi.clientDetail(id)
@@ -64,11 +65,25 @@ export default function ClientDetail() {
     } finally { setPdfBusy(false); }
   };
 
+  const onGenerateReport = async () => {
+    const completedSession = (client?.sessions || []).find((s) => s.status === 'completed');
+    if (!completedSession) return;
+    setGenBusy(true);
+    setPdfError(null);
+    try {
+      await advisorApi.generateReport(completedSession.id);
+      await load();
+    } catch (e) {
+      setPdfError(e?.message || 'Report generation failed. Try again in a moment.');
+    } finally { setGenBusy(false); }
+  };
+
   if (loading) return <p className="text-sm text-musper-muted">Loading client...</p>;
   if (error) return <p className="text-sm text-musper-orange-dark">{error}</p>;
   if (!client) return null;
 
   const r = client.latest_report;
+  const hasCompletedSession = (client.sessions || []).some((s) => s.status === 'completed');
 
   return (
     <div className="space-y-12">
@@ -109,6 +124,18 @@ export default function ClientDetail() {
               >
                 <FileDown size={14} /> {pdfBusy ? 'Generating PDF...' : 'Export PDF'}
               </button>
+              {hasCompletedSession && (
+                <button
+                  type="button"
+                  onClick={onGenerateReport}
+                  disabled={genBusy}
+                  title="Re-run the root-cause analysis on the completed interview"
+                  className="inline-flex items-center gap-2 rounded-full border border-musper-line bg-musper-cream-soft px-5 py-2.5 text-sm font-medium text-musper-ink/80 transition hover:border-musper-green/30 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <RefreshCw size={14} className={genBusy ? 'animate-spin' : ''} />
+                  {genBusy ? 'Analysing...' : 'Regenerate report'}
+                </button>
+              )}
             </div>
           )
         }
@@ -154,13 +181,30 @@ export default function ClientDetail() {
 
       {/* Report */}
       {r ? (
-        <ReportCard report={r} />
+        <ReportCard report={r} showRationales />
       ) : (
         <div className="rounded-3xl border border-dashed border-musper-line bg-musper-cream-soft/60 p-10 text-center">
           <p className="font-display text-2xl leading-tight tracking-editorial">No report yet.</p>
-          <p className="mt-3 text-sm text-musper-muted">
-            This session is still in progress. The report will appear here when the diagnostic is complete.
-          </p>
+          {hasCompletedSession ? (
+            <>
+              <p className="mt-3 text-sm text-musper-muted">
+                The interview is complete but its report has not been generated.
+              </p>
+              <button
+                type="button"
+                onClick={onGenerateReport}
+                disabled={genBusy}
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-musper-green px-6 py-3 text-sm font-medium text-musper-cream shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-musper-green-deep disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <RefreshCw size={14} className={genBusy ? 'animate-spin' : ''} />
+                {genBusy ? 'Analysing the interview...' : 'Generate report'}
+              </button>
+            </>
+          ) : (
+            <p className="mt-3 text-sm text-musper-muted">
+              This session is still in progress. The report will appear here when the diagnostic is complete.
+            </p>
+          )}
         </div>
       )}
 
