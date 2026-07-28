@@ -6,6 +6,7 @@ automatically in the background the moment an interview completes.
 """
 from __future__ import annotations
 
+import logging
 import uuid
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
@@ -15,6 +16,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.deps import get_current_user, require_csrf, require_role
 from app.core.limiter import limiter, user_or_ip_key
 from app.db.session import get_db
+from app.models.client import Client
 from app.models.diagnostic_session import DiagnosticSession, SessionStatus
 from app.models.user import User, UserRole
 from app.schemas.diagnostic import (
@@ -29,14 +31,25 @@ from app.services import report_generator
 
 router = APIRouter(prefix="/api/diagnostic", tags=["diagnostic"])
 
+log = logging.getLogger("musper.diagnostic")
+
 
 def _require_client_profile(db: Session, user: User):
     client = dash_svc.get_client_for_user(db, user)
     if client is None:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="No client profile is attached to this account.",
+        if user.role != UserRole.client:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No client profile is attached to this account.",
+            )
+        # Self-heal: signup now creates the profile row, but accounts registered
+        # before that fix (or a row lost some other way) land here.
+        log.warning(
+            "Client-role user %s had no client profile; creating a minimal one.", user.id
         )
+        db.add(Client(user_id=user.id))
+        db.commit()
+        client = dash_svc.get_client_for_user(db, user)
     return client
 
 

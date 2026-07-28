@@ -462,7 +462,7 @@ def _draw_cover(
     canvas.drawString(22 * mm, block_y, "Prepared for")
     canvas.setFillColor(CREAM)
     canvas.setFont(serif, 22)
-    canvas.drawString(22 * mm, block_y - 26, client.get("business_name", "-"))
+    canvas.drawString(22 * mm, block_y - 26, client.get("business_name") or "-")
     canvas.setFillColor(Color(0.96, 0.95, 0.92, alpha=0.85))
     canvas.setFont(sans, 10)
     sub_line = client.get("contact_name") or "Founder & Owner"
@@ -526,7 +526,7 @@ def render_report_pdf(
     report_id = str(report.get("id", uuid.uuid4()))
     report_ref = f"MS-{report_id[:8].upper()}"
     issued_date = _format_date(issued_dt)
-    business_name = client.get("business_name", "-")
+    business_name = client.get("business_name") or "-"
 
     # Document setup
     buffer = BytesIO()

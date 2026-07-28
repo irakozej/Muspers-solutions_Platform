@@ -8,6 +8,7 @@ from __future__ import annotations
 import uuid
 
 from fastapi import HTTPException
+from sqlalchemy import select
 
 from app.core.limiter import limiter
 from app.db.session import SessionLocal
@@ -33,10 +34,15 @@ def _register_client_user(client, email: str) -> str:
     )
     assert r.status_code == 201, r.text
     data = r.json()
-    # Registration creates the User; attach the Client profile row it needs.
+    # Registration auto-creates the Client profile; give it a stable name so
+    # dashboard-facing assertions have something to check.
     db = SessionLocal()
     try:
-        db.add(Client(user_id=uuid.UUID(data["user"]["id"]), business_name="Test Co"))
+        profile = db.scalar(
+            select(Client).where(Client.user_id == uuid.UUID(data["user"]["id"]))
+        )
+        assert profile is not None, "signup should have created the client profile"
+        profile.business_name = "Test Co"
         db.commit()
     finally:
         db.close()
@@ -260,3 +266,74 @@ def test_client_report_payload_excludes_rationales_advisor_includes():
     assert "rationale" not in client_view["scan_results"]["A"], "leak: client sees rationale"
     assert client_view["scan_results"]["A"]["score"] == 2  # score still shown
     assert advisor_view["scan_results"]["A"]["rationale"] == "PRIVATE: weak strategy signals"
+
+
+# ───────────────────── registration creates the client profile ─────────────────────
+
+def test_fresh_registration_can_start_diagnostic(client, monkeypatch):
+    """Regression: a brand-new signup must be able to start a diagnostic.
+
+    Production bug: registration created the users row but no clients row, so
+    /api/diagnostic/start returned 403 "No client profile is attached to this
+    account." Seed data masked it locally.
+    """
+    r = client.post(
+        "/api/auth/register",
+        json={
+            "email": "fresh-signup@test.musper.com",
+            "password": "Password123!",
+            "full_name": "Fresh Signup",
+        },
+    )
+    assert r.status_code == 201, r.text
+    token = r.json()["access_token"]
+    user_id = uuid.UUID(r.json()["user"]["id"])
+
+    # The profile row exists immediately after signup, with fields left empty.
+    db = SessionLocal()
+    try:
+        profile = db.scalar(select(Client).where(Client.user_id == user_id))
+        assert profile is not None
+        assert profile.business_name is None
+    finally:
+        db.close()
+
+    monkeypatch.setattr(chatbot, "_call_claude", lambda **_kw: (FAKE_FIRST, None))
+    resp = client.post("/api/diagnostic/start", headers=_auth(token))
+    assert resp.status_code == 201, resp.text
+
+
+def test_start_self_heals_missing_profile(client, monkeypatch):
+    """Defensive fallback: a client-role user whose profile row is missing
+    (pre-fix account) gets a minimal one created on the fly instead of a 403."""
+    r = client.post(
+        "/api/auth/register",
+        json={
+            "email": "legacy-account@test.musper.com",
+            "password": "Password123!",
+            "full_name": "Legacy Account",
+        },
+    )
+    assert r.status_code == 201, r.text
+    token = r.json()["access_token"]
+    user_id = uuid.UUID(r.json()["user"]["id"])
+
+    # Simulate an account created before the fix: remove the profile row.
+    db = SessionLocal()
+    try:
+        profile = db.scalar(select(Client).where(Client.user_id == user_id))
+        db.delete(profile)
+        db.commit()
+    finally:
+        db.close()
+
+    monkeypatch.setattr(chatbot, "_call_claude", lambda **_kw: (FAKE_FIRST, None))
+    resp = client.post("/api/diagnostic/start", headers=_auth(token))
+    assert resp.status_code == 201, resp.text
+
+    db = SessionLocal()
+    try:
+        healed = db.scalar(select(Client).where(Client.user_id == user_id))
+        assert healed is not None
+    finally:
+        db.close()

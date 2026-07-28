@@ -27,6 +27,7 @@ from app.core.security import (
     verify_password,
     verify_token_expiry,
 )
+from app.models.client import Client
 from app.models.refresh_token import RefreshToken
 from app.models.user import User, UserRole
 
@@ -73,6 +74,11 @@ def register_client(db: Session, *, email: str, password: str, full_name: str) -
     )
     db.add(user)
     try:
+        db.flush()
+        # Every client account gets its profile row at signup. Business fields
+        # start empty and are filled from the diagnostic snapshot or by the
+        # client editing their profile.
+        db.add(Client(user_id=user.id))
         db.commit()
     except IntegrityError:
         db.rollback()

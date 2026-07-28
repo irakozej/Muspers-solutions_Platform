@@ -27,7 +27,9 @@ class Client(Base):
         nullable=False,
         index=True,
     )
-    business_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    # Nullable: a profile is created empty at signup and filled from the
+    # diagnostic snapshot (or by the client editing their profile).
+    business_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     sector: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
     location: Mapped[str | None] = mapped_column(String(120), nullable=True)
 

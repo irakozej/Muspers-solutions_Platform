@@ -72,7 +72,7 @@ def collect_recent_activity(db: Session, *, limit: int) -> list[dict]:
         events.append(
             {
                 "kind": "client_registered",
-                "title": f"New client: {c.business_name}",
+                "title": f"New client: {c.business_name or 'Unnamed business'}",
                 "description": c.sector,
                 "at": c.created_at,
                 "client_id": c.id,
@@ -88,7 +88,7 @@ def collect_recent_activity(db: Session, *, limit: int) -> list[dict]:
         .limit(limit)
     )
     for s in completed:
-        bn = s.client.business_name if s.client else "Unknown"
+        bn = (s.client.business_name or "Unnamed business") if s.client else "Unknown"
         events.append(
             {
                 "kind": "diagnostic_completed",
@@ -106,7 +106,11 @@ def collect_recent_activity(db: Session, *, limit: int) -> list[dict]:
         .order_by(desc(Rating.created_at))
         .limit(limit)
     ):
-        bn = r.session.client.business_name if r.session and r.session.client else "Unknown"
+        bn = (
+            (r.session.client.business_name or "Unnamed business")
+            if r.session and r.session.client
+            else "Unknown"
+        )
         events.append(
             {
                 "kind": "rating_received",
@@ -152,7 +156,7 @@ def list_clients(
         out.append(
             {
                 "id": c.id,
-                "business_name": c.business_name,
+                "business_name": c.business_name or "Unnamed business",
                 "sector": c.sector,
                 "location": c.location,
                 "business_size": c.business_size.value if c.business_size else None,
@@ -207,7 +211,7 @@ def client_detail(db: Session, client_id: uuid.UUID) -> dict | None:
 
     return {
         "id": client.id,
-        "business_name": client.business_name,
+        "business_name": client.business_name or "Unnamed business",
         "sector": client.sector,
         "location": client.location,
         "business_size": client.business_size.value if client.business_size else None,

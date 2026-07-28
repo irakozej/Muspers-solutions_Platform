@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from copy import deepcopy
 from datetime import datetime, timezone
 from typing import Any
@@ -925,6 +926,38 @@ TURN_CAP_CLOSING = (
 )
 
 
+def _first_int(text: Any) -> int | None:
+    if text is None:
+        return None
+    match = re.search(r"\d{1,4}", str(text).replace(",", ""))
+    return int(match.group()) if match else None
+
+
+def _sync_client_profile_from_snapshot(session: DiagnosticSession) -> None:
+    """Fill empty Client profile fields from the completed interview's snapshot.
+
+    Only blank fields are written; a business name or sector the client (or an
+    advisor) already set is never overwritten. The caller commits alongside the
+    session-completion update.
+    """
+    client = session.client
+    snap = (session.diagnostic_state or {}).get("snapshot") or {}
+    if client is None or not snap:
+        return
+    if not client.business_name and snap.get("company_name"):
+        client.business_name = str(snap["company_name"]).strip()[:255]
+    if not client.sector and snap.get("sector"):
+        client.sector = str(snap["sector"]).strip()[:120]
+    if client.employee_count is None:
+        client.employee_count = _first_int(snap.get("team_size"))
+    if client.founded_year is None:
+        years = _first_int(snap.get("years_in_operation"))
+        if years is not None and 0 <= years <= 150:
+            client.founded_year = datetime.now(timezone.utc).year - years
+    if not client.revenue_band and snap.get("revenue_range"):
+        client.revenue_band = str(snap["revenue_range"]).strip()[:60]
+
+
 def submit_user_message(
     db: Session, *, session: DiagnosticSession, content: str
 ) -> tuple[ChatMessage, ChatMessage, bool]:
@@ -964,6 +997,7 @@ def submit_user_message(
         session.diagnostic_state = state
         session.status = SessionStatus.completed
         session.completed_at = datetime.now(timezone.utc)
+        _sync_client_profile_from_snapshot(session)
         db.add(session)
         db.commit()
         db.refresh(user_msg)
@@ -1052,6 +1086,7 @@ def submit_user_message(
     if is_complete:
         session.status = SessionStatus.completed
         session.completed_at = datetime.now(timezone.utc)
+        _sync_client_profile_from_snapshot(session)
     db.add(session)
     db.commit()
     db.refresh(user_msg)
