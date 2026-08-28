@@ -58,8 +58,8 @@ export default function AdvisorSettings() {
             <p className="eyebrow">Connected accounts</p>
             <h2 className="mt-3 font-display text-2xl tracking-editorial">Integrations.</h2>
             <p className="mt-3 max-w-2xl text-sm text-musper-muted">
-              Cal.com (consultation bookings), Mailchimp (newsletter), and Wave (accounting) integrations
-              ship in Phase 7. Each will appear here for one-click connection.
+              Cal.com (consultation bookings), Mailchimp (newsletter), and Wave (accounting)
+              are not connected yet. Each will appear here for one-click connection.
             </p>
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
               <IntegrationCard name="Cal.com" />

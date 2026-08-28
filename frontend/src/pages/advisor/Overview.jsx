@@ -136,8 +136,8 @@ export default function AdvisorOverview() {
               Send a diagnostic link to a new client.
             </h3>
             <p className="mt-3 max-w-md text-sm text-musper-muted">
-              When the chatbot (Phase 4) ships, this will generate a one-link onboarding flow.
-              Until then, send the public diagnostic page link.
+              Send a client the diagnostic link and the assistant takes them through the
+              interview. Their answers land here as a session you can review.
             </p>
           </div>
           <Link

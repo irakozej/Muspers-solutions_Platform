@@ -87,8 +87,8 @@ export default function Profile() {
         <div className="mt-12 rounded-3xl border border-musper-green/20 bg-musper-green-soft px-6 py-5">
           <p className="text-xs uppercase tracking-eyebrow text-musper-green">Advisor</p>
           <p className="mt-2 text-base text-musper-ink/85">
-            You're signed in as a MusperSolutions advisor. The advisor dashboard lands in Phase 6,
-            for now your account is provisioned and your sessions are secure.
+            You're signed in as a MusperSolutions advisor. Your workspace, with every
+            client, diagnostic session, and report, is in the advisor dashboard.
           </p>
         </div>
       )}

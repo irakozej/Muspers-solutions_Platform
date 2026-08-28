@@ -41,7 +41,7 @@ export default function AuthShell({ eyebrow, title, accent, children, footer }) 
             <span className="text-musper-cream/30">·</span>
             <span>est. 2011</span>
             <span className="text-musper-cream/30">·</span>
-            <span>{accent || 'Phase 3, Authentication'}</span>
+            <span>{accent || 'Secure sign in'}</span>
           </div>
         </motion.aside>
 
