@@ -31,7 +31,7 @@ from app.models.user import User, UserRole  # noqa: E402
 
 ADVISOR_EMAIL = "penny@muspersolutions.com"
 ADVISOR_PASSWORD = os.environ.get("ADVISOR_SEED_PASSWORD", "ChangeMe2026!")
-ADVISOR_FULL_NAME = "MusperSolutions Advisory"
+ADVISOR_FULL_NAME = os.environ.get("ADVISOR_SEED_NAME", "Penny")
 
 
 def main() -> int:
