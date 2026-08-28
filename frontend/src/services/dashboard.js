@@ -1,4 +1,4 @@
-import { request, fetchAttachment, triggerDownload } from './api';
+import { request, fetchAttachment, triggerDownload, TIMEOUTS } from './api';
 
 async function downloadPdf(path, fallback) {
   const { blob, filename } = await fetchAttachment(path, { fallbackName: fallback });
@@ -22,7 +22,10 @@ export const advisorApi = {
       body: { content },
     }),
   generateReport: (sessionId) =>
-    request(`/api/diagnostic/${sessionId}/generate-report`, { method: 'POST' }),
+    request(`/api/diagnostic/${sessionId}/generate-report`, {
+      method: 'POST',
+      timeoutMs: TIMEOUTS.report,
+    }),
   toggleShare: (reportId, isShared) =>
     request(`/api/advisor/reports/${reportId}/share`, {
       method: 'PATCH',

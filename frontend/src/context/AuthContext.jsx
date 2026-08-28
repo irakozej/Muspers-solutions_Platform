@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { authApi } from '../services/auth';
-import { tokenStore } from '../services/api';
+import { tokenStore, TIMEOUTS } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
     let cancelled = false;
     const boot = async () => {
       try {
-        const data = await authApi.refresh();
+        const data = await authApi.refresh({ timeoutMs: TIMEOUTS.boot });
         if (cancelled) return;
         setUser(data?.user || null);
         setStatus(data?.user ? 'authenticated' : 'anonymous');

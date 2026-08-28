@@ -1,11 +1,13 @@
-import { request } from './api';
+import { request, TIMEOUTS } from './api';
 
 export const diagnosticApi = {
-  start: () => request('/api/diagnostic/start', { method: 'POST' }),
+  start: () =>
+    request('/api/diagnostic/start', { method: 'POST', timeoutMs: TIMEOUTS.chatTurn }),
   sendMessage: (sessionId, content) =>
     request(`/api/diagnostic/${sessionId}/message`, {
       method: 'POST',
       body: { content },
+      timeoutMs: TIMEOUTS.chatTurn,
     }),
   getSession: (sessionId) => request(`/api/diagnostic/${sessionId}`),
 };

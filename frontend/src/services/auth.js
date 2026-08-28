@@ -1,4 +1,4 @@
-import { request, tokenStore } from './api';
+import { request, tokenStore, refreshSession } from './api';
 
 async function setAccessFromResponse(data) {
   if (data?.access_token) tokenStore.set(data.access_token);
@@ -20,9 +20,9 @@ export const authApi = {
 
   me: () => request('/api/auth/me'),
 
-  refresh: () =>
-    request('/api/auth/refresh', { method: 'POST', withAuth: false })
-      .then(setAccessFromResponse),
+  // Deduped in api.js: the refresh token is single-use, so parallel callers
+  // must share one request.
+  refresh: (opts) => refreshSession(opts),
 
   forgotPassword: (email) =>
     request('/api/auth/forgot-password', {
