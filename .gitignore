@@ -30,3 +30,4 @@ npm-debug.log*
 
 # --- Docker volumes (host-side) ---
 .pgdata/
+.demo-logs/
