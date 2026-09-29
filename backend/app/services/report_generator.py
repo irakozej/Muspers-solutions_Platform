@@ -86,6 +86,7 @@ REPORT_TOOL: dict[str, Any] = {
         "type": "object",
         "required": [
             "headline",
+            "scan_summaries",
             "presenting_problem",
             "root_cause",
             "root_cause_evidence",
@@ -103,6 +104,26 @@ REPORT_TOOL: dict[str, Any] = {
                     "'Retention looks like the problem; undocumented operations "
                     "are what is actually bleeding customers.' Plain text."
                 ),
+            },
+            "scan_summaries": {
+                "type": "object",
+                "required": SCAN_AREA_KEYS,
+                "properties": {
+                    key: {
+                        "type": "string",
+                        "description": (
+                            f"Area {key} ({SCAN_AREA_MAP[key]['name']}): 1-2 "
+                            "sentences summarising what the client said about "
+                            "this area. Draw on the whole transcript, not only "
+                            "the scan answer, since clients often cover an area "
+                            "in a later reply. The client will read this, so no "
+                            "scores, no scoring notes, no remarks about how the "
+                            "interview went. If the client never clearly "
+                            "addressed the area, say that plainly."
+                        ),
+                    }
+                    for key in SCAN_AREA_KEYS
+                },
             },
             "presenting_problem": {
                 "type": "string",
@@ -315,7 +336,8 @@ def _build_evidence_pack(state: dict[str, Any], transcript: list[Any]) -> str:
         area = scan.get(key, {})
         name = SCAN_AREA_MAP[key]["name"]
         score = area.get("score")
-        lines.append(f"[{key}] {name}: {score if score is not None else 'not scored'}")
+        defaulted = " (defaulted, the answer was unclear)" if _is_defaulted(area) else ""
+        lines.append(f"[{key}] {name}: {score if score is not None else 'not scored'}{defaulted}")
         if area.get("answer"):
             lines.append(f"    Client's answer: {area['answer']}")
         if area.get("rationale"):
@@ -414,21 +436,53 @@ def _sanitize(value):
 
 # ───────────────────── persistence ─────────────────────
 
-def _scores_json(state: dict[str, Any]) -> dict[str, Any]:
+DEFAULTED_NOTE = (
+    "The answer in this area was unclear, so it was given a neutral score "
+    "of 3 for MusperSolutions to confirm with you."
+)
+NO_SUMMARY = "The client did not clearly address this area during the interview."
+
+
+def _is_defaulted(area: dict[str, Any]) -> bool:
+    """True when the area's score is the clarification default rather than a
+    real reading. States saved before the `defaulted` flag existed are
+    inferred: no score at all, or a 3 with no recorded answer."""
+    if area.get("defaulted"):
+        return True
+    score = area.get("score")
+    return score is None or (score == 3 and not (area.get("answer") or "").strip())
+
+
+def _scores_json(
+    state: dict[str, Any], summaries: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Scan scores + a 0-100 aggregate so every legacy list/dashboard reader
-    (which expects grow_overall/band) keeps working without changes."""
+    (which expects grow_overall/band) keeps working without changes.
+
+    Every area A-F always carries a name, a score and a summary, so no
+    renderer ever has an empty section. `rationale` is advisor-only and is
+    stripped from client payloads in dashboard._report_payload."""
+    summaries = summaries or {}
     scan_out: dict[str, Any] = {}
     scored: list[int] = []
     for key in SCAN_AREA_KEYS:
-        area = (state.get("scan") or {}).get(key, {})
-        score = area.get("score")
+        area = (state.get("scan") or {}).get(key) or {}
+        defaulted = _is_defaulted(area)
+        score = 3 if area.get("score") is None else int(area["score"])
+        summary = (
+            (summaries.get(key) or "").strip()
+            or (area.get("answer") or "").strip()
+            or NO_SUMMARY
+        )
         scan_out[key] = {
             "name": SCAN_AREA_MAP[key]["name"],
             "score": score,
+            "summary": summary,
+            "defaulted": defaulted,
+            "note": DEFAULTED_NOTE if defaulted else None,
             "rationale": area.get("rationale"),
         }
-        if score is not None:
-            scored.append(int(score))
+        scored.append(score)
 
     aggregate = round(sum(scored) / len(scored) * 20, 1) if scored else 0.0
     return {
@@ -502,7 +556,7 @@ def generate_report(db: Session, session: DiagnosticSession) -> Report:
     evidence = _build_evidence_pack(state, transcript)
     analysis = _sanitize(_call_report_model(evidence))
 
-    scores = _scores_json(state)
+    scores = _scores_json(state, analysis.get("scan_summaries"))
     content = _content_json(state, analysis)
 
     existing = db.scalar(

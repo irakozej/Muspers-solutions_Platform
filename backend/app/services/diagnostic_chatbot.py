@@ -234,7 +234,7 @@ def init_state() -> dict[str, Any]:
         "snapshot_clarified": {step["id"]: False for step in SNAPSHOT_STEPS},
         "scan_area_idx": 0,
         "scan": {
-            k: {"score": None, "answer": None, "rationale": None, "clarified": False}
+            k: {"score": None, "answer": None, "rationale": None, "clarified": False, "defaulted": False}
             for k in SCAN_AREA_KEYS
         },
         "branch_order": [],
@@ -311,7 +311,10 @@ def apply_extraction(
         single character; in that case we allow one (and only one) follow-up
         per Snapshot step, then force-advance.
       - SCAN: the model may clarify once per area. After that, default to 3
-        and move on (handled below).
+        and move on (handled below). A turn that yields neither a score nor an
+        answer (off-topic, prompt injection, missing tool call) counts as that
+        clarification: the model re-asks the same question in that case, so
+        advancing would file every later answer under the wrong area.
       - BRANCH / TRIANGULATE: free-form recall; we never re-ask. Whatever the
         user said is what we record.
     """
@@ -331,18 +334,20 @@ def apply_extraction(
                 return False
             # Otherwise: force-advance, ignoring the clarification request.
             # The model was overzealous; Snapshot answers are facts.
-        elif stage == "scan":
-            area_key = target["area"]["key"]
-            if not state["scan"][area_key]["clarified"]:
-                state["scan"][area_key]["clarified"] = True
-                return False
-            # Already clarified once. Fall through and force-advance (score
-            # will default to 3 below since the extraction has no score).
         # Branch / Triangulate: clarification not allowed in this stage - fall
         # through to the "answered" path.
 
     elif raw_status not in (None, "answered"):
         log.warning("Unexpected extraction status %r; treating as 'answered'.", raw_status)
+
+    if stage == "scan":
+        area_key = target["area"]["key"]
+        empty_turn = extraction.get("score") is None and not _has_real_content(extracted_value)
+        if (raw_status == "needs_clarification" or empty_turn) and not state["scan"][area_key]["clarified"]:
+            state["scan"][area_key]["clarified"] = True
+            return False
+        # Already clarified once. Fall through and force-advance (score
+        # will default to 3 below since the extraction has no score).
 
     if target["stage"] == "snapshot":
         snap = (extraction or {}).get("snapshot") or {}
@@ -359,13 +364,12 @@ def apply_extraction(
     elif target["stage"] == "scan":
         key = target["area"]["key"]
         score = (extraction or {}).get("score")
-        # If the model has been clarified once and still didn't return a score,
-        # default to 3 to keep the interview moving.
-        if score is None and state["scan"][key]["clarified"]:
-            score = 3
-        if score is not None:
-            score = max(1, min(5, int(score)))
+        # No usable score (unclear answer, or clarified once already): default
+        # to 3 to keep the interview moving, and flag it for the report.
+        defaulted = score is None
+        score = 3 if score is None else max(1, min(5, int(score)))
         state["scan"][key]["score"] = score
+        state["scan"][key]["defaulted"] = defaulted
         state["scan"][key]["answer"] = extracted_value
         state["scan"][key]["rationale"] = (extraction or {}).get("score_rationale")
         state["scan_area_idx"] += 1
@@ -1055,8 +1059,20 @@ def submit_user_message(
     assistant_text, extraction = _call_claude(system_prompt=system_prompt, history=history)
 
     # Mutate the real state based on the actual extraction
+    forced_advance = False
     if current_target is not None:
-        apply_extraction(state, current_target, extraction or {"status": "answered"})
+        extraction = extraction or {"status": "answered"}
+        advanced = apply_extraction(state, current_target, extraction)
+        # The model re-asked the current question (clarification or an empty
+        # off-topic turn) but the backend moved on anyway. Its text would now
+        # be one question behind the state, so ask the real next question.
+        forced_advance = advanced and (
+            extraction.get("status") == "needs_clarification"
+            or (
+                current_target["stage"] == "scan"
+                and not _has_real_content((extraction.get("extracted_value") or "").strip())
+            )
+        )
 
     # Recompute next target for real
     real_next = next_target(state)
@@ -1067,8 +1083,9 @@ def submit_user_message(
     # echoed from the system prompt.
     assistant_text = _strip_leaked_guidance(assistant_text)
 
-    if not assistant_text:
-        # The model gave us a tool call but no text. Don't beg for clarification:
+    if not assistant_text or forced_advance:
+        # The model gave us a tool call but no text (or text for a question
+        # the backend has already moved past). Don't beg for clarification:
         # synthesise the next question deterministically so the conversation flows.
         assistant_text = _fallback_next_question(real_next)
     elif real_next is not None and "?" not in assistant_text:

@@ -79,7 +79,7 @@ export function StatTile({ label, value, detail, accent }) {
 }
 
 // Scan bar for MusperSolutions' root-cause framework: 1-5 scale, band-coloured.
-function ScanGauge({ areaKey, name, score, rationale, showRationale }) {
+function ScanGauge({ areaKey, name, score, summary, note, rationale, showRationale }) {
   const s = score ?? 0;
   const pct = Math.max(0, Math.min(100, (s / 5) * 100));
   const tone = s >= 4 ? 'bg-musper-green' : s === 3 ? 'bg-musper-green-mid' : 'bg-musper-orange';
@@ -100,14 +100,30 @@ function ScanGauge({ areaKey, name, score, rationale, showRationale }) {
       <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-musper-line">
         <div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
       </div>
+      <p className="mt-2 text-sm leading-relaxed text-musper-ink/80">{summary}</p>
+      {note && (
+        <p className="mt-1.5 text-xs italic leading-relaxed text-musper-orange-dark">{note}</p>
+      )}
       {showRationale && rationale && (
-        <p className="mt-2 text-xs leading-relaxed text-musper-muted">{rationale}</p>
+        <p className="mt-2 text-xs leading-relaxed text-musper-muted">
+          <span className="font-medium">Scoring note: </span>{rationale}
+        </p>
       )}
     </div>
   );
 }
 
-const SCAN_ORDER = ['A', 'B', 'C', 'D', 'E', 'F'];
+const SCAN_AREAS = [
+  ['A', 'Strategic Clarity'],
+  ['B', 'Operations and Systems'],
+  ['C', 'People and Capacity'],
+  ['D', 'Funding and Resource Mobilization'],
+  ['E', 'Governance and Structure'],
+  ['F', 'Stakeholder and Customer Engagement'],
+];
+
+// Reports generated before per-area summaries existed have no summary text.
+const NO_SUMMARY = 'No summary was recorded for this area. MusperSolutions will go over it with you.';
 
 // MusperSolutions' Root-Cause Diagnostic Report layout.
 // showRationales: true for the advisor view only; clients never see scoring notes.
@@ -160,16 +176,21 @@ function RootCauseReport({ report, showRationales = false }) {
           Scan results <span className="normal-case tracking-tight">(1 = critical gap, 5 = strong)</span>
         </p>
         <div className="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-          {SCAN_ORDER.map((k) => scan[k] && (
-            <ScanGauge
-              key={k}
-              areaKey={k}
-              name={scan[k].name}
-              score={scan[k].score}
-              rationale={scan[k].rationale}
-              showRationale={showRationales}
-            />
-          ))}
+          {SCAN_AREAS.map(([k, fallbackName]) => {
+            const area = scan[k] || {};
+            return (
+              <ScanGauge
+                key={k}
+                areaKey={k}
+                name={area.name || fallbackName}
+                score={area.score}
+                summary={area.summary || NO_SUMMARY}
+                note={area.note}
+                rationale={area.rationale}
+                showRationale={showRationales}
+              />
+            );
+          })}
         </div>
       </section>
 

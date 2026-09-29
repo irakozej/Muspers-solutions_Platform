@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
 from typing import Any
+from xml.sax.saxutils import escape
 
 from reportlab.lib.colors import HexColor, Color
 from reportlab.lib.pagesizes import A4
@@ -670,6 +671,20 @@ def _append_hatana_flow(
         flow.append(Spacer(0, 18))
 
 
+SCAN_AREA_NAMES = {
+    "A": "Strategic Clarity",
+    "B": "Operations and Systems",
+    "C": "People and Capacity",
+    "D": "Funding and Resource Mobilization",
+    "E": "Governance and Structure",
+    "F": "Stakeholder and Customer Engagement",
+}
+# Reports generated before per-area summaries existed have no summary text.
+SCAN_NO_SUMMARY = (
+    "No summary was recorded for this area. MusperSolutions will go over it with you."
+)
+
+
 class ScanBar(Flowable):
     """Root-cause scan row: '[A] Strategic Clarity' + n/5 + band-coloured bar."""
 
@@ -800,8 +815,14 @@ def _append_root_cause_flow(
     ))
     for key in ("A", "B", "C", "D", "E", "F"):
         area = scan.get(key) or {}
-        flow.append(ScanBar(frame_w, key, area.get("name", key), area.get("score")))
-        flow.append(Spacer(0, 8))
+        rows: list[Any] = [
+            ScanBar(frame_w, key, area.get("name") or SCAN_AREA_NAMES[key], area.get("score")),
+            Paragraph(escape(area.get("summary") or SCAN_NO_SUMMARY), styles["body-soft"]),
+        ]
+        if area.get("note"):
+            rows.append(Paragraph(escape(area["note"]), styles["note"]))
+        flow.append(KeepTogether(rows))
+        flow.append(Spacer(0, 10))
     flow.append(Spacer(0, 10))
 
     # ── 3 · Diagnosis (new page: the heart of the report) ─────────────────────

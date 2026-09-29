@@ -93,7 +93,10 @@ export default function Analytics() {
 
         {/* Top red flags */}
         <section className="rounded-3xl border border-musper-line bg-musper-cream-soft/70 p-6 sm:p-8 lg:col-span-6">
-          <p className="eyebrow">Most common red flags</p>
+          <p className="eyebrow before:hidden">
+            <span aria-hidden="true" className="text-sm leading-none">🚩</span>
+            Most common red flags
+          </p>
           <h2 className="mt-3 font-display text-2xl tracking-editorial">What keeps coming up.</h2>
           {data.top_red_flags.length === 0 ? (
             <p className="mt-6 text-sm text-musper-muted">No red flags recorded yet.</p>
