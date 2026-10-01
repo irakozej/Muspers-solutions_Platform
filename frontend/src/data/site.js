@@ -270,3 +270,6 @@ export const navLinks = [
   { to: '/testimonials', label: 'Voices' },
   { to: '/contact', label: 'Contact' },
 ];
+
+// Where clients book a session with Penny. Swap for the Cal.com link when it exists.
+export const BOOKING_URL = '/contact';

@@ -53,13 +53,24 @@ export default function ClientReports() {
                   <p className="mt-3 max-w-2xl text-sm text-musper-muted line-clamp-2">{r.summary}</p>
                 )}
                 <p className="mt-3 text-xs text-musper-muted-soft">
-                  {r.priority_actions?.length || 0} priority actions · {r.red_flags?.length || 0} red flags · {r.suggested_topics?.length || 0} coaching topics
+                  {r.report_type === 'root_cause'
+                    ? `${r.priorities?.length || 0} priority actions · ${r.service_pathway?.length || 0} recommended services`
+                    : `${r.priority_actions?.length || 0} priority actions · ${r.red_flags?.length || 0} red flags`}
                 </p>
               </div>
               <div className="flex items-center gap-5">
                 <div>
-                  <p className="text-[0.65rem] uppercase tracking-eyebrow text-musper-muted">GROW</p>
-                  <ScoreBand band={r.headline.grow_band} score={r.headline.grow_overall} size="sm" />
+                  {r.summary_cover?.financial_health?.assessed ? (
+                    <>
+                      <p className="text-[0.65rem] uppercase tracking-eyebrow text-musper-muted">Financial health</p>
+                      <ScoreBand band={r.summary_cover.financial_health.band} score={r.summary_cover.financial_health.pct} size="sm" />
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[0.65rem] uppercase tracking-eyebrow text-musper-muted">Overall</p>
+                      <ScoreBand band={r.headline.grow_band} score={r.headline.grow_overall} size="sm" />
+                    </>
+                  )}
                 </div>
                 <ArrowUpRight size={18} className="text-musper-green opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-100" />
               </div>

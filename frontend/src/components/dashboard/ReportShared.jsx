@@ -392,7 +392,7 @@ function SummaryCover({ report }) {
   );
 }
 
-function ScoreRing({ label, score, size }) {
+export function ScoreRing({ label, score, size }) {
   const big = size === 'lg';
   const dim = big ? 148 : 104;
   const stroke = big ? 10 : 7;

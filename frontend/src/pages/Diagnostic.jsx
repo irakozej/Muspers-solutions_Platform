@@ -6,6 +6,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { diagnosticApi, STAGE_ORDER, STAGE_LABELS } from '../services/diagnostic';
+import { clientApi } from '../services/dashboard';
+import TeaserSnapshot from '../components/dashboard/TeaserSnapshot';
 
 export default function Diagnostic() {
   const { user, isAuthenticated, isInitializing } = useAuth();
@@ -200,36 +202,9 @@ function DiagnosticInterview() {
     );
   }
 
-  // Completed -> thank you
+  // Completed -> teaser snapshot (scores computed instantly from the interview)
   if (session.complete) {
-    return (
-      <SplashShell>
-        <motion.div
-          initial={{ scale: 0.85, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 18 }}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-musper-green text-musper-cream"
-        >
-          <Check size={22} />
-        </motion.div>
-        <h1 className="mt-8 font-display text-[2.25rem] leading-[1.05] tracking-editorial sm:text-[3rem] text-balance">
-          Thank you, your diagnostic is complete.
-        </h1>
-        <p className="mt-6 max-w-xl text-base leading-relaxed text-musper-muted">
-          MusperSolutions will personally review your responses and put together a report.
-          You'll see it on your dashboard once it has been shared with you.
-        </p>
-        <div className="mt-10 flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center gap-2 rounded-full bg-musper-green px-6 py-3 text-sm font-medium text-musper-cream shadow-soft hover:-translate-y-0.5 hover:bg-musper-green-deep transition-all duration-300"
-          >
-            Back to dashboard <ArrowUpRight size={14} />
-          </button>
-        </div>
-      </SplashShell>
-    );
+    return <CompletionScreen sessionId={session.id} onDashboard={() => navigate('/dashboard')} />;
   }
 
   // Active interview
@@ -245,6 +220,60 @@ function DiagnosticInterview() {
           onSend={send}
           disabled={pending || session.complete}
         />
+      </div>
+    </section>
+  );
+}
+
+// ───────────────────── completion ─────────────────────
+
+function CompletionScreen({ sessionId, onDashboard }) {
+  const [teaser, setTeaser] = useState(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    clientApi.snapshot(sessionId)
+      .then((t) => { if (alive) setTeaser(t); })
+      .catch(() => { if (alive) setFailed(true); });
+    return () => { alive = false; };
+  }, [sessionId]);
+
+  return (
+    <section className="bg-musper-cream-soft/40 min-h-[calc(100vh-5rem)]">
+      <div className="container mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+        <motion.div
+          initial={{ scale: 0.85, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-musper-green text-musper-cream"
+        >
+          <Check size={20} />
+        </motion.div>
+        <h1 className="mt-6 font-display text-[2rem] leading-[1.05] tracking-editorial sm:text-[2.75rem] text-balance">
+          Thank you, your diagnostic is complete.
+        </h1>
+        <div className="mt-8">
+          {teaser ? (
+            <TeaserSnapshot teaser={teaser} />
+          ) : failed ? (
+            <p className="text-base leading-relaxed text-musper-muted">
+              Your answers are saved. Your snapshot will be waiting on your dashboard, and Penny will
+              share your full report with you once she has reviewed it.
+            </p>
+          ) : (
+            <p className="flex items-center gap-2 text-sm text-musper-muted">
+              <Loader2 size={14} className="animate-spin" /> Preparing your snapshot...
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onDashboard}
+          className="mt-8 inline-flex items-center gap-2 rounded-full border border-musper-line bg-white px-6 py-3 text-sm font-medium text-musper-ink transition-colors hover:border-musper-green/30"
+        >
+          Go to your dashboard <ArrowUpRight size={14} />
+        </button>
       </div>
     </section>
   );

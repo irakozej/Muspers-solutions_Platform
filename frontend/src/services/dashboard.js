@@ -41,6 +41,8 @@ export const clientApi = {
   sessions: () => request('/api/client/sessions'),
   reports: () => request('/api/client/reports'),
   transcript: (sessionId) => request(`/api/client/sessions/${sessionId}/transcript`),
+  snapshot: (sessionId) => request(`/api/client/sessions/${sessionId}/snapshot`),
+  report: (reportId) => request(`/api/client/reports/${reportId}`),
   rate: (sessionId, score, feedback) =>
     request(`/api/client/sessions/${sessionId}/rate`, {
       method: 'POST',

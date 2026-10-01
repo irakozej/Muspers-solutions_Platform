@@ -202,6 +202,31 @@ class ClientTranscript(BaseModel):
     has_shared_report: bool
 
 
+class TeaserScore(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    pct: int | None
+    band: str | None
+    band_label: str
+    assessed: bool
+
+
+class TeaserSnapshot(BaseModel):
+    """What a client sees before Penny shares the full report. Allowlist:
+    two headline scores, two area NAMES, the locked section titles, and the
+    share status. Never analysis, rationales or per-category scores."""
+    model_config = ConfigDict(extra="forbid")
+    session_id: uuid.UUID
+    completed_at: datetime | None
+    financial_health: TeaserScore
+    business_health: TeaserScore
+    strongest_area: str | None
+    attention_area: str | None
+    locked_sections: list[str]
+    share_note: str
+    report_shared: bool
+    report_id: uuid.UUID | None
+
+
 class RateSessionRequest(BaseModel):
     score: int = Field(ge=1, le=5)
     feedback: str | None = Field(default=None, max_length=2000)

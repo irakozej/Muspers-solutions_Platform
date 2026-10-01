@@ -12,10 +12,11 @@ export default function ClientReportDetail() {
   const [pdfError, setPdfError] = useState(null);
 
   useEffect(() => {
-    clientApi.reports().then((rs) => {
-      setReport(rs.find((r) => r.id === id) || null);
-      setLoading(false);
-    });
+    // 403 from the server until Penny shares the report.
+    clientApi.report(id)
+      .then((r) => setReport(r))
+      .catch(() => setReport(null))
+      .finally(() => setLoading(false));
   }, [id]);
 
   const onDownloadPdf = async () => {

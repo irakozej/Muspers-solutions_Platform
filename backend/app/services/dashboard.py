@@ -243,9 +243,11 @@ def client_detail(db: Session, client_id: uuid.UUID) -> dict | None:
     }
 
 
-def _session_summary(session: DiagnosticSession) -> dict:
+def _session_summary(session: DiagnosticSession, *, for_client: bool = False) -> dict:
     report = max(session.reports, key=lambda r: r.created_at) if session.reports else None
     scores = report.scores_json if report else None
+    if for_client and not (report and report.is_shared):
+        scores = None  # analysis stays locked until Penny shares the report
     rating = session.ratings[0] if session.ratings else None
     return {
         "id": session.id,
@@ -425,7 +427,7 @@ def get_client_for_user(db: Session, user: User) -> Client | None:
 
 def client_sessions(client: Client) -> list[dict]:
     return [
-        _session_summary(s)
+        _session_summary(s, for_client=True)
         for s in sorted(client.diagnostic_sessions, key=lambda s: s.started_at, reverse=True)
     ]
 

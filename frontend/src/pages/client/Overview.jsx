@@ -4,21 +4,31 @@ import { Sparkles, FileText, History, ArrowUpRight, Building2 } from 'lucide-rea
 import { clientApi } from '../../services/dashboard';
 import { useAuth } from '../../context/AuthContext';
 import {
-  EmptyState, PageHeading, ScoreBand, StatusPill, formatRelative,
+  EmptyState, PageHeading, StatusPill, formatRelative,
 } from '../../components/dashboard/ReportShared';
+import TeaserSnapshot from '../../components/dashboard/TeaserSnapshot';
+
+// Teasers for the most recent completed interviews; older ones live in History.
+const MAX_TEASERS = 3;
 
 export default function ClientOverview() {
   const { user } = useAuth();
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [teasers, setTeasers] = useState([]);
 
   useEffect(() => {
-    clientApi.me().then((d) => { setOverview(d); setLoading(false); });
+    clientApi.me().then(async (d) => {
+      setOverview(d);
+      setLoading(false);
+      const completed = (d.sessions || []).filter((s) => s.status === 'completed').slice(0, MAX_TEASERS);
+      const results = await Promise.all(completed.map((s) => clientApi.snapshot(s.id).catch(() => null)));
+      setTeasers(results.filter(Boolean));
+    });
   }, []);
 
   const firstName = user?.full_name?.split(' ')[0] || 'there';
   const sessions = overview?.sessions || [];
-  const sharedReports = overview?.shared_reports || [];
   const hasStarted = sessions.length > 0;
 
   return (
@@ -55,44 +65,13 @@ export default function ClientOverview() {
         />
       ) : (
         <>
-          {/* Shared reports, highlighted */}
-          {sharedReports.length > 0 && (
+          {/* Results: teaser per completed interview; full report once Penny shares */}
+          {teasers.length > 0 && (
             <section>
-              <div className="flex items-baseline justify-between">
-                <div>
-                  <p className="eyebrow">Shared with you</p>
-                  <h2 className="mt-3 font-display text-2xl tracking-editorial sm:text-3xl">Your latest diagnostic report.</h2>
-                </div>
-                <Link to="/dashboard/reports" className="text-sm text-musper-green hover:text-musper-green-deep">
-                  All reports →
-                </Link>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                {sharedReports.map((r) => (
-                  <Link
-                    key={r.id}
-                    to={`/dashboard/reports/${r.id}`}
-                    className="group flex flex-col gap-5 rounded-3xl border border-musper-green/15 bg-musper-green-soft/50 p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft sm:flex-row sm:items-center"
-                  >
-                    <div className="flex-1">
-                      <p className="text-xs uppercase tracking-eyebrow text-musper-green">Hatana-style report</p>
-                      <p className="mt-3 font-display text-2xl leading-tight tracking-editorial">
-                        Report from {new Date(r.created_at).toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' })}
-                      </p>
-                      {r.summary && (
-                        <p className="mt-3 max-w-2xl text-sm text-musper-muted line-clamp-2">{r.summary}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-center">
-                        <p className="text-[0.65rem] uppercase tracking-eyebrow text-musper-muted">GROW</p>
-                        <ScoreBand band={r.headline.grow_band} score={r.headline.grow_overall} size="sm" />
-                      </div>
-                      <ArrowUpRight size={18} className="text-musper-green opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-100" />
-                    </div>
-                  </Link>
-                ))}
+              <p className="eyebrow">Your results</p>
+              <h2 className="mt-3 font-display text-2xl tracking-editorial sm:text-3xl">Your latest diagnostic.</h2>
+              <div className="mt-6 space-y-6">
+                {teasers.map((t) => <TeaserSnapshot key={t.session_id} teaser={t} compact />)}
               </div>
             </section>
           )}
