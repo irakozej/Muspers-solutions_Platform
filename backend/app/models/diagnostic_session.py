@@ -38,7 +38,9 @@ class DiagnosticSession(Base):
 
     client: Mapped["Client"] = relationship(back_populates="diagnostic_sessions")  # noqa: F821
     messages: Mapped[list["ChatMessage"]] = relationship(  # noqa: F821
-        back_populates="session", cascade="all, delete-orphan", order_by="ChatMessage.created_at"
+        back_populates="session", cascade="all, delete-orphan",
+        # created_at, then role: enum order puts "user" before "assistant" on ties.
+        order_by="(ChatMessage.created_at, ChatMessage.role)"
     )
     reports: Mapped[list["Report"]] = relationship(  # noqa: F821
         back_populates="session", cascade="all, delete-orphan"

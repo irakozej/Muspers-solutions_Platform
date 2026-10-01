@@ -39,7 +39,7 @@ from sqlalchemy.orm import selectinload  # noqa: E402
 
 from app.core.config import settings  # noqa: E402
 from app.db.session import SessionLocal  # noqa: E402
-from app.models.chat_message import MessageRole  # noqa: E402
+from app.models.chat_message import MessageRole, message_order  # noqa: E402
 from app.models.diagnostic_session import DiagnosticSession, SessionStatus  # noqa: E402
 from app.models.report import Report  # noqa: E402
 from app.services import report_generator  # noqa: E402
@@ -116,7 +116,7 @@ def _report_needs_regen(report: Report | None) -> bool:
 def _rescore(session: DiagnosticSession) -> dict[str, Any]:
     transcript = "\n".join(
         f"{'INTERVIEWER' if m.role == MessageRole.assistant else 'CLIENT'}: {m.content}"
-        for m in sorted(session.messages, key=lambda m: m.created_at)
+        for m in sorted(session.messages, key=message_order)
     )
     response = _get_client().with_options(timeout=settings.claude_report_timeout_seconds).messages.create(
         model=settings.claude_model,

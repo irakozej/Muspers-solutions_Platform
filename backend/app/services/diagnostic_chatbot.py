@@ -24,7 +24,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models.chat_message import ChatMessage, MessageRole
+from app.models.chat_message import ChatMessage, MessageRole, message_order
 from app.models.diagnostic_session import DiagnosticSession, SessionStatus
 from app.services.finance_framework import (
     FINANCE_CATEGORIES,
@@ -1188,7 +1188,7 @@ def submit_user_message(
     # Build the model history out of the actual transcript
     db.refresh(session)
     transcript = list(session.messages)
-    transcript.sort(key=lambda m: m.created_at)
+    transcript.sort(key=message_order)
     history = [
         {
             "role": "assistant" if m.role == MessageRole.assistant else "user",

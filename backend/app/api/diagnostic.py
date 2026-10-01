@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.deps import get_current_user, require_csrf, require_role
 from app.core.limiter import limiter, user_or_ip_key
 from app.db.session import get_db
+from app.models.chat_message import message_order
 from app.models.client import Client
 from app.models.diagnostic_session import DiagnosticSession, SessionStatus
 from app.models.user import User, UserRole
@@ -155,7 +156,7 @@ def get_session(
     db: Session = Depends(get_db),
 ) -> DiagnosticSessionDetail:
     session = _load_session_for_user(db, session_id=session_id, user=user)
-    messages = sorted(session.messages, key=lambda m: m.created_at)
+    messages = sorted(session.messages, key=message_order)
     return DiagnosticSessionDetail(
         session_id=session.id,
         status=session.status.value,

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.scoring import band_for, band_label
 from app.models.advisor_note import AdvisorNote
-from app.models.chat_message import ChatMessage
+from app.models.chat_message import ChatMessage, message_order
 from app.models.client import Client
 from app.models.diagnostic_session import DiagnosticSession, SessionStatus
 from app.models.rating import Rating
@@ -219,7 +219,7 @@ def client_detail(db: Session, client_id: uuid.UUID) -> dict | None:
 
     # Show the transcript belonging to the reported interview when one exists.
     focus = report_session or latest
-    transcript = sorted(focus.messages, key=lambda m: m.created_at) if focus else []
+    transcript = sorted(focus.messages, key=message_order) if focus else []
     rating = focus.ratings[0] if focus and focus.ratings else None
 
     return {
@@ -453,7 +453,7 @@ def client_transcript(
     )
     if session is None:
         return None
-    messages = sorted(session.messages, key=lambda m: m.created_at)
+    messages = sorted(session.messages, key=message_order)
     rating = session.ratings[0] if session.ratings else None
     has_shared_report = any(r.is_shared for r in session.reports)
     return {

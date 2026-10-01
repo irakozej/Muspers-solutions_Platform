@@ -31,7 +31,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.config import settings
 from app.core.scoring import band_for
 from app.db.session import SessionLocal
-from app.models.chat_message import MessageRole
+from app.models.chat_message import MessageRole, message_order
 from app.models.diagnostic_session import DiagnosticSession, SessionStatus
 from app.models.report import Report
 from app.services.diagnostic_chatbot import (
@@ -728,7 +728,7 @@ def generate_report(db: Session, session: DiagnosticSession) -> Report:
             detail="This session has no diagnostic data to analyse.",
         )
 
-    transcript = sorted(session.messages, key=lambda m: m.created_at)
+    transcript = sorted(session.messages, key=message_order)
     evidence = _build_evidence_pack(state, transcript)
     # Scores do not depend on the model, so priorities come from exactly
     # what the report will store.
