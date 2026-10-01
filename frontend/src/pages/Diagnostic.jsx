@@ -33,7 +33,7 @@ function SignedOutScreen() {
         Sign in to start your diagnostic.
       </h1>
       <p className="mt-6 max-w-xl text-base leading-relaxed text-musper-muted">
-        The MusperSolutions diagnostic is a guided fifteen to twenty minute conversation.
+        The MusperSolutions diagnostic is a guided twenty-five to thirty minute conversation.
         We ask a few structured questions and the report goes to MusperSolutions first.
       </p>
       <div className="mt-8 flex flex-wrap gap-3">
@@ -171,7 +171,7 @@ function DiagnosticInterview() {
       <SplashShell>
         <p className="eyebrow">Diagnostic</p>
         <h1 className="mt-6 font-display text-[2.25rem] leading-[1.05] tracking-editorial sm:text-[3.5rem] text-balance">
-          A guided fifteen to twenty minute conversation about your business.
+          A guided twenty-five to thirty minute conversation about your business.
         </h1>
         <p className="mt-6 max-w-2xl text-base leading-relaxed text-musper-muted">
           We'll ask short, plain questions about how the business is really doing.
@@ -256,11 +256,11 @@ function ProgressBar({ progress }) {
   const currentIdx = STAGE_ORDER.indexOf(progress?.stage || 'snapshot');
   return (
     <div className="mb-6 flex items-center gap-2 text-xs">
-      {STAGE_ORDER.slice(0, 4).map((stage, i) => {
+      {STAGE_ORDER.slice(0, -1).map((stage, i) => {
         const active = i === currentIdx;
         const done = i < currentIdx;
         return (
-          <div key={stage} className="flex flex-1 items-center gap-2">
+          <div key={stage} className={['flex min-w-0 items-center gap-2', active ? 'flex-auto' : 'sm:flex-1'].join(' ')}>
             <span
               className={[
                 'flex h-2 w-2 shrink-0 rounded-full transition-colors duration-500',
@@ -270,6 +270,8 @@ function ProgressBar({ progress }) {
             <span
               className={[
                 'truncate font-medium uppercase tracking-eyebrow',
+                // Five stages do not fit at phone width: show only the active label there.
+                active ? '' : 'hidden sm:inline',
                 active ? 'text-musper-orange' : done ? 'text-musper-green' : 'text-musper-muted-soft',
               ].join(' ')}
             >

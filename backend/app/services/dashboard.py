@@ -288,13 +288,16 @@ def _report_payload(
     # Root-cause (MusperSolutions' framework) sections, present only on new reports.
     if payload["report_type"] == "root_cause":
         scan = scores.get("scan") or {}
+        finance = scores.get("finance") or {}
         if not include_rationales:
             # Strip the private scoring notes for any non-advisor caller.
-            scan = {
-                k: {kk: vv for kk, vv in (v or {}).items() if kk != "rationale"}
-                for k, v in scan.items()
-            }
+            scan, finance = (
+                {k: {kk: vv for kk, vv in (v or {}).items() if kk != "rationale"} for k, v in d.items()}
+                for d in (scan, finance)
+            )
         payload["scan_results"] = scan
+        payload["finance_results"] = finance
+        payload["financial_health_pct"] = scores.get("financial_health_pct")
         payload["snapshot"] = content.get("snapshot") or {}
         payload["diagnosis"] = content.get("diagnosis") or {}
         payload["service_pathway"] = content.get("service_pathway") or []

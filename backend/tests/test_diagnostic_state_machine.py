@@ -8,6 +8,14 @@ def _advance(state, target, extraction):
     return cb.next_target(state)
 
 
+def _strong_money_habits(state, target):
+    """Answer all eight Money Habits anchors strongly (no follow-ups)."""
+    for _ in range(len(cb.FINANCE_CATEGORIES)):
+        assert target["stage"] == "finance"
+        target = _advance(state, target, {"status": "answered", "extracted_value": "...", "finance_score": 3})
+    return target
+
+
 def test_initial_target_is_first_snapshot_step():
     state = cb.init_state()
     target = cb.next_target(state)
@@ -53,7 +61,9 @@ def test_full_scan_records_six_scores_in_order():
             target,
             {"status": "answered", "extracted_value": f"answer for {k}", "score": scores[k]},
         )
-    # After Scan, we should be in Branch with the correct branch_order (only 1-3)
+    # After Scan comes Money Habits, then Branch with the correct branch_order (only 1-3)
+    assert state["stage"] == "finance"
+    _strong_money_habits(state, target)
     assert state["stage"] == "branch"
     assert state["branch_order"] == ["C", "D", "F"]
 
@@ -70,6 +80,7 @@ def test_branch_only_runs_for_weak_areas_then_triangulate():
             target,
             {"status": "answered", "extracted_value": "...", "score": scores[k]},
         )
+    target = _strong_money_habits(state, target)
     # We're now at the first branch target
     assert target["stage"] == "branch"
     assert target["area"]["key"] == "C"
@@ -104,6 +115,7 @@ def test_triangulate_always_asks_all_five_then_completes():
             state, target,
             {"status": "answered", "extracted_value": "strong", "score": 5},
         )
+    target = _strong_money_habits(state, target)
     assert state["branch_order"] == []
     # We jumped straight to triangulate
     assert state["stage"] == "triangulate"

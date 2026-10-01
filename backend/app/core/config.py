@@ -55,9 +55,11 @@ class Settings(BaseSettings):
     # Report generation is a single bigger call: more output room, longer timeout.
     claude_report_max_tokens: int = 3000
     claude_report_timeout_seconds: float = 120.0
-    # Cost ceiling: max user turns per interview (~3x a normal 20-turn interview).
+    # Cost ceiling: max user turns per interview. A normal interview is 25-39
+    # turns (Money Habits follow-ups and Branch questions vary); using every
+    # allowed clarification takes it to 59. 80 leaves room for off-topic turns.
     # On reaching the cap the interview closes gracefully and is marked completed.
-    diagnostic_max_user_turns: int = 60
+    diagnostic_max_user_turns: int = 80
 
     @property
     def cors_origin_list(self) -> list[str]:

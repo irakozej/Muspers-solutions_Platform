@@ -87,6 +87,9 @@ class ReportPayload(BaseModel):
     created_at: datetime
     # Root-cause sections (None/absent on legacy reports)
     scan_results: dict[str, Any] | None = None
+    # Money Habits (empty / None on reports from before the stage existed)
+    finance_results: dict[str, Any] | None = None
+    financial_health_pct: int | None = None
     snapshot: dict[str, Any] | None = None
     diagnosis: dict[str, Any] | None = None
     service_pathway: list[dict[str, Any]] | None = None

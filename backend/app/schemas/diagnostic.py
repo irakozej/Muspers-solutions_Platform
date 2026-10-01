@@ -20,6 +20,8 @@ class DiagnosticProgress(BaseModel):
     snapshot_total: int = 0
     scan_done: int = 0
     scan_total: int = 0
+    finance_done: int = 0
+    finance_total: int = 0
     branch_done: int = 0
     branch_total: int = 0
     triangulate_done: int = 0

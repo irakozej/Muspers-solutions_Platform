@@ -12,10 +12,11 @@ export const diagnosticApi = {
   getSession: (sessionId) => request(`/api/diagnostic/${sessionId}`),
 };
 
-export const STAGE_ORDER = ['snapshot', 'scan', 'branch', 'triangulate', 'complete'];
+export const STAGE_ORDER = ['snapshot', 'scan', 'finance', 'branch', 'triangulate', 'complete'];
 export const STAGE_LABELS = {
   snapshot: 'Snapshot',
   scan: 'Scan',
+  finance: 'Money habits',
   branch: 'Deeper questions',
   triangulate: 'Final reflections',
   complete: 'Complete',

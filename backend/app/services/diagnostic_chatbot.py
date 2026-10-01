@@ -1,4 +1,4 @@
-"""Scan, Branch, Triangulate diagnostic chatbot.
+"""Scan, Money Habits, Branch, Triangulate diagnostic chatbot.
 
 A deterministic state machine drives the interview. Each turn:
   1. The user's message is saved as a chat_message.
@@ -26,6 +26,13 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models.chat_message import ChatMessage, MessageRole
 from app.models.diagnostic_session import DiagnosticSession, SessionStatus
+from app.services.finance_framework import (
+    FINANCE_CATEGORIES,
+    FINANCE_KEYS,
+    FINANCE_MAP,
+    UNCLEAR_SCORE,
+    needs_followup,
+)
 
 log = logging.getLogger("musper.chatbot")
 
@@ -216,6 +223,30 @@ TRIANGULATE_KEYS: list[str] = [t["id"] for t in TRIANGULATE_STEPS]
 
 # ───────────────────── state shape & state machine ─────────────────────
 
+def _init_finance_state() -> dict[str, Any]:
+    return {
+        "finance_idx": 0,
+        # "anchor" while the category's anchor question is open, "followup"
+        # while its single follow-up (score 0 or 1 only) is open.
+        "finance_phase": "anchor",
+        "finance": {
+            k: {
+                "score": None, "question": None, "answer": None,
+                "followup_question": None, "followup_answer": None,
+                "rationale": None, "unclear": False, "clarified": False,
+            }
+            for k in FINANCE_KEYS
+        },
+        "finance_followups": [],
+    }
+
+
+def _ensure_finance_state(state: dict[str, Any]) -> None:
+    """Sessions started before Money Habits existed have no finance keys."""
+    for key, value in _init_finance_state().items():
+        state.setdefault(key, value)
+
+
 def init_state() -> dict[str, Any]:
     return {
         "stage": "snapshot",
@@ -237,6 +268,7 @@ def init_state() -> dict[str, Any]:
             k: {"score": None, "answer": None, "rationale": None, "clarified": False, "defaulted": False}
             for k in SCAN_AREA_KEYS
         },
+        **_init_finance_state(),
         "branch_order": [],
         "branch_idx": 0,
         "branch": {k: None for k in SCAN_AREA_KEYS},
@@ -261,6 +293,20 @@ def next_target(state: dict[str, Any]) -> dict[str, Any] | None:
         if state["scan_area_idx"] < len(SCAN_AREAS):
             area = SCAN_AREAS[state["scan_area_idx"]]
             return {"stage": "scan", "area": area}
+        _ensure_finance_state(state)
+        state["finance_idx"] = 0
+        state["finance_phase"] = "anchor"
+        state["stage"] = "finance"
+
+    # Money Habits
+    if state["stage"] == "finance":
+        _ensure_finance_state(state)
+        if state["finance_idx"] < len(FINANCE_CATEGORIES):
+            return {
+                "stage": "finance",
+                "category": FINANCE_CATEGORIES[state["finance_idx"]],
+                "phase": state["finance_phase"],
+            }
         # Compute branch_order: only areas with score 1-3, in original order
         state["branch_order"] = [
             k for k in SCAN_AREA_KEYS
@@ -315,6 +361,10 @@ def apply_extraction(
         answer (off-topic, prompt injection, missing tool call) counts as that
         clarification: the model re-asks the same question in that case, so
         advancing would file every later answer under the wrong area.
+      - FINANCE (Money Habits): same clarification budget as Scan, one per
+        category across its anchor and follow-up. If the anchor is still
+        unclear after that, it scores 1 and is marked unclear. A score of 0
+        or 1 opens the category's single follow-up; 2 or 3 moves on.
       - BRANCH / TRIANGULATE: free-form recall; we never re-ask. Whatever the
         user said is what we record.
     """
@@ -349,6 +399,13 @@ def apply_extraction(
         # Already clarified once. Fall through and force-advance (score
         # will default to 3 below since the extraction has no score).
 
+    if stage == "finance":
+        cat = state["finance"][target["category"]["key"]]
+        empty_turn = extraction.get("finance_score") is None and not _has_real_content(extracted_value)
+        if (raw_status == "needs_clarification" or empty_turn) and not cat["clarified"]:
+            cat["clarified"] = True
+            return False
+
     if target["stage"] == "snapshot":
         snap = (extraction or {}).get("snapshot") or {}
         # The model may also drop the bare extracted_value when only one field
@@ -374,6 +431,33 @@ def apply_extraction(
         state["scan"][key]["rationale"] = (extraction or {}).get("score_rationale")
         state["scan_area_idx"] += 1
 
+    elif target["stage"] == "finance":
+        key = target["category"]["key"]
+        cat = state["finance"][key]
+        raw_score = extraction.get("finance_score")
+        score = None if raw_score is None else max(0, min(3, int(raw_score)))
+        asked = (extraction.get("question_asked") or "").strip() or None
+        rationale = extraction.get("score_rationale")
+        if target["phase"] == "anchor":
+            cat["question"] = asked or target["category"]["anchor"]
+            cat["answer"] = extracted_value
+            cat["unclear"] = score is None
+            cat["score"] = UNCLEAR_SCORE if score is None else score
+            cat["rationale"] = rationale
+            if needs_followup(cat["score"]):
+                state["finance_phase"] = "followup"
+                state["finance_followups"].append(key)
+                return True
+        else:
+            cat["followup_question"] = asked or _default_followup(state, key)
+            cat["followup_answer"] = extracted_value
+            if score is not None:  # the follow-up finalises the score
+                cat["score"] = score
+                cat["unclear"] = False
+                cat["rationale"] = rationale or cat["rationale"]
+        state["finance_idx"] += 1
+        state["finance_phase"] = "anchor"
+
     elif target["stage"] == "branch":
         state["branch"][target["area"]["key"]] = extracted_value
         state["branch_idx"] += 1
@@ -383,6 +467,14 @@ def apply_extraction(
         state["triangulate_idx"] += 1
 
     return True
+
+
+def _default_followup(state: dict[str, Any], key: str) -> str:
+    """The follow-up to fall back on when the model did not name the one it
+    asked: the first one that was not already used in place of the anchor."""
+    used = (state.get("finance") or {}).get(key, {}).get("question")
+    options = FINANCE_MAP[key]["followups"]
+    return next((q for q in options if q != used), options[0])
 
 
 # ───────────────────── prompt construction ─────────────────────
@@ -430,7 +522,7 @@ Plain language
 
 Pacing and discretion
 - ONE question per turn. Never stack questions with "and also".
-- The whole interview should feel like a focused 15 to 20 minute conversation.
+- The whole interview should feel like a focused 25 to 30 minute conversation.
 - You collect; you never diagnose. No conclusions, no scores, no advice, no
   hints about how they are doing. The analysis happens later, and MusperSolutions
   decides what is shared.
@@ -484,6 +576,14 @@ CLARIFICATION RULES (very important, varies per stage):
   already used a clarification for this area, you may set
   status='needs_clarification' ONCE per area. Otherwise status='answered'.
 
+- MONEY HABITS stage: you privately score each money category 0 to 3
+  against its rubric (finance_score). If the answer is too vague to score AND
+  you have not already used a clarification for this category, you may set
+  status='needs_clarification' ONCE per category. Otherwise status='answered'.
+  A vague answer about money is itself a signal: score it low rather than
+  probing again. Any money amounts you mention are in Rwandan francs (RWF),
+  never dollars.
+
 - BRANCH stage: record whatever the user said. Do not probe further; the
   consultant can pick that up in person. status='answered' every time.
 
@@ -492,9 +592,9 @@ CLARIFICATION RULES (very important, varies per stage):
 """
 
 METHODOLOGY = """\
-THE INTERVIEW METHOD: Scan, Branch, Triangulate
+THE INTERVIEW METHOD: Scan, Money Habits, Branch, Triangulate
 
-You guide the client through four stages, in this exact order:
+You guide the client through five stages, in this exact order:
 
 1. SNAPSHOT - collect six basic facts about the business, one question at a time,
    conversationally. Never ask all at once.
@@ -503,10 +603,14 @@ You guide the client through four stages, in this exact order:
    question that lets the client describe their reality, then you privately infer
    a score from 1 (critical gap) to 5 (strong). You never say the score out loud.
 
-3. BRANCH - only for areas that scored 1-3, you ask the matching deeper question.
+3. MONEY HABITS - one anchor question for each of eight money categories. You
+   privately score each answer 0 (critical gap) to 3 (strong). Only a score of
+   0 or 1 earns ONE follow-up question from that category; 2 or 3 moves on.
+
+4. BRANCH - only for areas that scored 1-3, you ask the matching deeper question.
    Areas scored 4-5 are skipped entirely.
 
-4. TRIANGULATE - five reflective questions every client gets, regardless of scores.
+5. TRIANGULATE - five reflective questions every client gets, regardless of scores.
 
 The backend (not you) tracks which stage you are in and which question is next.
 Each turn, you will be told exactly what question to ask next.
@@ -557,8 +661,28 @@ RECORD_TOOL: dict[str, Any] = {
             "score_rationale": {
                 "type": "string",
                 "description": (
-                    "ONLY for Scan: 1-2 short sentences explaining why this score, "
+                    "ONLY for Scan and Money Habits: 1-2 short sentences explaining "
+                    "why this score (score or finance_score), "
                     "for internal use later by the advisor. Never spoken to the user."
+                ),
+            },
+            "finance_score": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 3,
+                "description": (
+                    "ONLY when answering a Money Habits question and "
+                    "status='answered': the 0-3 score for that category against "
+                    "its rubric. On a follow-up, give the final score for the "
+                    "category using both of the client's answers."
+                ),
+            },
+            "question_asked": {
+                "type": "string",
+                "description": (
+                    "ONLY for Money Habits: the exact question you asked that "
+                    "this reply answers (the anchor, the alternative you used "
+                    "instead of it, or the follow-up)."
                 ),
             },
             "snapshot": {
@@ -611,6 +735,26 @@ def _describe_target(target: dict[str, Any] | None) -> str:
             f"[Private listening guidance, do NOT repeat in your text reply: "
             f"{a['model_guidance']}]"
         )
+    if stage == "finance":
+        c = target["category"]
+        rubric = "; ".join(f"{n}={d}" for n, d in c["rubric"].items())
+        options = " | ".join(f'"{q}"' for q in c["followups"])
+        if target["phase"] == "anchor":
+            return (
+                f"Money Habits, {c['name']}. Ask the client this question (you "
+                f"may lightly reword for warmth, keep the substance): \"{c['anchor']}\" "
+                "If the client already answered this clearly earlier in the "
+                "conversation (for example in the company facts or when talking "
+                "about how the business is funded), do not ask it again: briefly "
+                "acknowledge what they told you and ask one of these instead: "
+                f"{options}. [Private scoring rubric, do NOT repeat in your text "
+                f"reply: {rubric}]"
+            )
+        return (
+            f"Money Habits follow-up for {c['name']}. You asked ONE of these "
+            f"follow-ups: {options}. Score the category again using both "
+            f"answers. [Private scoring rubric, do NOT repeat: {rubric}]"
+        )
     if stage == "branch":
         a = target["area"]
         return (
@@ -640,6 +784,13 @@ def _state_summary_lines(state: dict[str, Any]) -> str:
         s = state["scan"][k]["score"]
         scan_summary.append(f"{k}:{s if s is not None else '-'}")
     lines.append(f"  Scan scores so far (private): {' '.join(scan_summary)}")
+    if state["stage"] == "finance":
+        fin = state.get("finance") or {}
+        fin_summary = " ".join(
+            f"{k}:{(fin.get(k) or {}).get('score') if (fin.get(k) or {}).get('score') is not None else '-'}"
+            for k in FINANCE_KEYS
+        )
+        lines.append(f"  Money Habits scores so far (private): {fin_summary}")
     if state["stage"] in ("branch", "triangulate"):
         lines.append(f"  Branch areas to cover: {state['branch_order'] or 'none'}")
     return "\n".join(lines)
@@ -656,7 +807,7 @@ def build_system_prompt(
     parts.append(
         "You are the diagnostic interviewer for MusperSolutions, a business "
         "consultancy based in Kigali, Rwanda. Your job is to run a structured "
-        "fifteen to twenty minute interview that captures how the client's "
+        "twenty-five to thirty minute interview that captures how the client's "
         "business is really doing."
     )
     parts.append(VOICE_GUIDE)
@@ -686,6 +837,16 @@ def build_system_prompt(
             "just said. Pick status based on the stage rules above. For Snapshot, that "
             "almost always means status='answered'."
         )
+        if current_target and current_target["stage"] == "finance" and current_target["phase"] == "anchor":
+            options = " | ".join(f'"{q}"' for q in current_target["category"]["followups"])
+            parts.append(
+                "- MONEY HABITS RULE FOR THIS TURN: if your finance_score for this "
+                "answer is 0 or 1, do NOT ask the next question below. Instead ask "
+                "exactly ONE follow-up for this same category, whichever of these is "
+                "most useful given what the client said and has not already been "
+                f"asked or answered: {options}. Only with a score of 2 or 3 do you "
+                "move on to the next question below."
+            )
         if next_target_after is None:
             parts.append(
                 "- Then write a warm one or two sentence closing thanking them and "
@@ -769,6 +930,12 @@ def _fallback_next_question(target: dict[str, Any] | None) -> str:
         )
     if stage == "scan":
         return target["area"]["audience_question"]
+    if stage == "finance":
+        key = target["category"]["key"]
+        if target["phase"] == "anchor":
+            return target["category"]["anchor"]
+        state_hint = target.get("followup_question")
+        return state_hint or FINANCE_MAP[key]["followups"][0]
     if stage == "branch":
         return target["question"]
     if stage == "triangulate":
@@ -1044,6 +1211,10 @@ def submit_user_message(
             shadow["snapshot_step_idx"] += 1
         elif shadow_current["stage"] == "scan":
             shadow["scan_area_idx"] += 1
+        elif shadow_current["stage"] == "finance":
+            # Assume a 2-3 score; the prompt spells out the 0-1 follow-up case.
+            shadow["finance_idx"] += 1
+            shadow["finance_phase"] = "anchor"
         elif shadow_current["stage"] == "branch":
             shadow["branch_idx"] += 1
         elif shadow_current["stage"] == "triangulate":
@@ -1069,13 +1240,16 @@ def submit_user_message(
         forced_advance = advanced and (
             extraction.get("status") == "needs_clarification"
             or (
-                current_target["stage"] == "scan"
+                current_target["stage"] in ("scan", "finance")
                 and not _has_real_content((extraction.get("extracted_value") or "").strip())
             )
         )
 
     # Recompute next target for real
     real_next = next_target(state)
+    if real_next and real_next["stage"] == "finance" and real_next["phase"] == "followup":
+        # Lets the fallback text ask a follow-up that was not already used.
+        real_next["followup_question"] = _default_followup(state, real_next["category"]["key"])
     is_complete = real_next is None
     state["current_target"] = real_next
 
@@ -1119,6 +1293,7 @@ def session_progress(state: dict[str, Any] | None) -> dict[str, Any]:
     labels = {
         "snapshot": "Snapshot",
         "scan": "Scan",
+        "finance": "Money habits",
         "branch": "Deeper questions",
         "triangulate": "Final reflections",
         "complete": "Complete",
@@ -1130,6 +1305,8 @@ def session_progress(state: dict[str, Any] | None) -> dict[str, Any]:
         "snapshot_total": len(SNAPSHOT_STEPS),
         "scan_done": state.get("scan_area_idx", 0),
         "scan_total": len(SCAN_AREAS),
+        "finance_done": state.get("finance_idx", 0),
+        "finance_total": len(FINANCE_CATEGORIES),
         "branch_done": state.get("branch_idx", 0),
         "branch_total": len(state.get("branch_order", [])),
         "triangulate_done": state.get("triangulate_idx", 0),

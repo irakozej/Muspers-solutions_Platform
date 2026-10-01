@@ -41,6 +41,7 @@ from app.services.diagnostic_chatbot import (
     _RETRY_MSG,
     _get_client,
 )
+from app.services.finance_framework import FINANCE_CATEGORIES, FINANCE_KEYS, financial_health_pct
 
 log = logging.getLogger("musper.report")
 
@@ -258,6 +259,10 @@ HOW TO REASON:
   when the evidence supports it.
 - Weigh the branch answers heavily; they were only asked where the scan
   found weakness, so they carry the most diagnostic signal.
+- Use the Money Habits section (eight money categories scored 0 to 3) as
+  evidence like any other: weak money habits are often the condition
+  underneath an operational or growth complaint. Older interviews may not
+  have this section; never invent it.
 - Strong areas matter too: they rule causes out and are assets to build on.
 
 GROUNDING RULES (non-negotiable):
@@ -342,6 +347,27 @@ def _build_evidence_pack(state: dict[str, Any], transcript: list[Any]) -> str:
             lines.append(f"    Client's answer: {area['answer']}")
         if area.get("rationale"):
             lines.append(f"    Interviewer's scoring note: {area['rationale']}")
+
+    lines.append("\n=== MONEY HABITS (0 = critical gap, 3 = strong) ===")
+    finance = state.get("finance") or {}
+    if not any((finance.get(k) or {}).get("score") is not None for k in FINANCE_KEYS):
+        lines.append("(not covered in this interview)")
+    else:
+        pct = financial_health_pct({k: (finance.get(k) or {}).get("score") for k in FINANCE_KEYS})
+        lines.append(f"Financial health: {f'{pct}%' if pct is not None else 'incomplete'}")
+        for cat in FINANCE_CATEGORIES:
+            entry = finance.get(cat["key"]) or {}
+            score = entry.get("score")
+            unclear = " (answer stayed unclear)" if entry.get("unclear") else ""
+            lines.append(f"[{cat['key']}] {cat['name']}: {score if score is not None else 'not scored'}{unclear}")
+            if entry.get("answer"):
+                lines.append(f"    Asked: {entry.get('question') or cat['anchor']}")
+                lines.append(f"    Client's answer: {entry['answer']}")
+            if entry.get("followup_answer"):
+                lines.append(f"    Follow-up asked: {entry.get('followup_question')}")
+                lines.append(f"    Client's answer: {entry['followup_answer']}")
+            if entry.get("rationale"):
+                lines.append(f"    Interviewer's scoring note: {entry['rationale']}")
 
     lines.append("\n=== BRANCH ANSWERS (only asked where the scan found weakness) ===")
     branch = state.get("branch", {})
@@ -485,15 +511,41 @@ def _scores_json(
         scored.append(score)
 
     aggregate = round(sum(scored) / len(scored) * 20, 1) if scored else 0.0
+    finance_out, health_pct = _finance_scores(state)
     return {
         "report_type": REPORT_TYPE,
         "scan": scan_out,
+        # Money Habits. Empty / None on sessions from before the stage existed.
+        "finance": finance_out,
+        "financial_health_pct": health_pct,
+        "finance_followups": list(state.get("finance_followups") or []),
         # Legacy-reader compatibility (client lists, session summaries, stats):
         "grow_overall": aggregate,
         "grow_band": band_for(aggregate),
         "finance_readiness": aggregate,
         "finance_band": band_for(aggregate),
     }
+
+
+def _finance_scores(state: dict[str, Any]) -> tuple[dict[str, Any], int | None]:
+    """Money Habits scores for the report. `rationale` is advisor-only and is
+    stripped from client payloads in dashboard._report_payload. The health
+    percentage is computed here in code, never by the model."""
+    finance = state.get("finance") or {}
+    if not any((finance.get(k) or {}).get("score") is not None for k in FINANCE_KEYS):
+        return {}, None
+    out: dict[str, Any] = {}
+    for cat in FINANCE_CATEGORIES:
+        entry = finance.get(cat["key"]) or {}
+        out[cat["key"]] = {
+            "name": cat["name"],
+            "score": entry.get("score"),
+            "unclear": bool(entry.get("unclear")),
+            "followed_up": cat["key"] in (state.get("finance_followups") or []),
+            "rationale": entry.get("rationale"),
+        }
+    pct = financial_health_pct({k: out[k]["score"] for k in FINANCE_KEYS})
+    return out, pct
 
 
 def _content_json(state: dict[str, Any], analysis: dict[str, Any]) -> dict[str, Any]:
