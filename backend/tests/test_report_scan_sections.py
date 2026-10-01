@@ -132,7 +132,7 @@ def _fake_analysis(summaries):
 
 
 def _generate(monkeypatch, state, summaries):
-    monkeypatch.setattr(rg, "_call_report_model", lambda _pack: _fake_analysis(summaries))
+    monkeypatch.setattr(rg, "_call_report_model", lambda *_a, **_k: _fake_analysis(summaries))
     session = SimpleNamespace(
         id=uuid.uuid4(), status=SessionStatus.completed, diagnostic_state=state, messages=[]
     )

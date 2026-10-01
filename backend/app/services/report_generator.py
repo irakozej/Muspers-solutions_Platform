@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import uuid
 from typing import Any
 
@@ -42,6 +43,7 @@ from app.services.diagnostic_chatbot import (
     _get_client,
 )
 from app.services.finance_framework import FINANCE_CATEGORIES, FINANCE_KEYS, financial_health_pct
+from app.services.report_summary import business_health_pct, priority_areas
 
 log = logging.getLogger("musper.report")
 
@@ -259,10 +261,12 @@ HOW TO REASON:
   when the evidence supports it.
 - Weigh the branch answers heavily; they were only asked where the scan
   found weakness, so they carry the most diagnostic signal.
-- Use the Money Habits section (eight money categories scored 0 to 3) as
-  evidence like any other: weak money habits are often the condition
-  underneath an operational or growth complaint. Older interviews may not
-  have this section; never invent it.
+- Always examine the Money Habits section (eight money categories scored 0
+  to 3) as a candidate root cause. Weak money habits are often the condition
+  underneath an operational or growth complaint: when the evidence supports
+  that, connect them to the root cause explicitly. When it does not, say
+  what the money habits rule in or out and do not force the link. Older
+  interviews may not have this section; never invent it.
 - Strong areas matter too: they rule causes out and are assets to build on.
 
 GROUNDING RULES (non-negotiable):
@@ -280,9 +284,11 @@ VOICE:
 - A sharp Rwandan business consultant writing for another consultant: direct,
   concrete, professional. Honest about weaknesses without being harsh; the
   goal is clarity the client can act on, not a verdict.
-- Plain language. No em-dashes (use commas or periods). No buzzwords, no
-  consulting jargon, no AI filler like "delve", "landscape", "leverage",
-  "holistic", "journey".
+- Plain language. No em-dashes or dashes used as punctuation (use commas or
+  periods). No emoji. No buzzwords, no consulting jargon, no clichés or AI
+  filler like "delve", "landscape", "leverage", "holistic", "journey",
+  "game-changer", "unlock", "robust", "navigate", "at the end of the day",
+  "it's not just X, it's Y".
 - Write in third person about the business ("the company", "{'{'}owner name{'}'}"),
   since MusperSolutions is the reader.
 
@@ -312,9 +318,79 @@ Respect the client's stated appetite; if the root cause needs more than they
 signalled appetite for, choose the type matching their appetite and say in
 next_step what a first slice would be.
 
+THE SUMMARY COVER (the first thing the client reads):
+- The headline scores, strongest and weakest areas, and priority areas are
+  computed in code and given to you. Never restate them differently or
+  invent other numbers.
+- combined_headline and combined_body say what the combined result tells
+  us. Lead with what the money habits reveal, then connect them to the
+  rest of the picture. Plain, specific, grounded in the scores and answers.
+  When Money Habits were not covered, lead with the strongest signal there is.
+- For each priority area, write one concrete first step the client can take
+  this week, adapted to what they actually said. Not a programme, a step.
+
 OUTPUT: call the submit_report tool exactly once with every field filled.
 No text outside the tool call.
 """
+
+
+def _report_tool(priorities: list[dict[str, Any]], has_finance: bool) -> dict[str, Any]:
+    """REPORT_TOOL plus the fields that depend on this interview: a summary
+    per Money Habits category (when covered) and a first step per priority."""
+    tool = json.loads(json.dumps(REPORT_TOOL))
+    schema = tool["input_schema"]
+    schema["properties"]["combined_headline"] = {
+        "type": "string",
+        "description": (
+            "One bold sentence: what the combined result tells us. Leads with "
+            "what the money habits reveal. Plain text, no numbers invented."
+        ),
+    }
+    schema["properties"]["combined_body"] = {
+        "type": "string",
+        "description": (
+            "Exactly 2 or 3 short sentences (never more) expanding the headline, "
+            "grounded in the scores and the client's answers, connecting money "
+            "habits to the wider picture."
+        ),
+    }
+    schema["required"] += ["combined_headline", "combined_body"]
+    if has_finance:
+        schema["properties"]["finance_summaries"] = {
+            "type": "object",
+            "required": FINANCE_KEYS,
+            "properties": {
+                c["key"]: {
+                    "type": "string",
+                    "description": (
+                        f"{c['name']}: 1-2 sentences summarising what the client "
+                        "said about this money habit. The client will read this, "
+                        "so no scores and no scoring notes."
+                    ),
+                }
+                for c in FINANCE_CATEGORIES
+            },
+        }
+        schema["required"].append("finance_summaries")
+    if priorities:
+        schema["properties"]["priority_steps"] = {
+            "type": "object",
+            "required": [p["key"] for p in priorities],
+            "properties": {
+                p["key"]: {
+                    "type": "string",
+                    "description": (
+                        f"Priority: {p['name']} ({p['score']}/{p['max']}). One concrete "
+                        "first step for this week, 1-2 sentences, adapted to what the "
+                        "client said."
+                        + (f" Build on this recommendation: {p['recommendation']}." if p.get("recommendation") else "")
+                    ),
+                }
+                for p in priorities
+            },
+        }
+        schema["required"].append("priority_steps")
+    return tool
 
 
 # ───────────────────── evidence pack assembly ─────────────────────
@@ -385,6 +461,20 @@ def _build_evidence_pack(state: dict[str, Any], transcript: list[Any]) -> str:
         label = TRIANGULATE_LABELS.get(key, key)
         lines.append(f"{label}: {tri.get(key) or 'not captured'}")
 
+    lines.append("\n=== COMPUTED IN CODE (use as given) ===")
+    stored = _scores_json(state)
+    pct = stored["financial_health_pct"]
+    lines.append(f"Financial Health: {f'{pct}%' if pct is not None else 'not assessed'}")
+    bh = business_health_pct(stored["scan"])
+    lines.append(f"Business Health (Scan areas on 0-100): {f'{bh}%' if bh is not None else 'not assessed'}")
+    priorities = priority_areas(stored["scan"], stored["finance"])
+    if priorities:
+        lines.append("Priority areas, weakest first:")
+        for p in priorities:
+            lines.append(f"  [{p['key']}] {p['name']}: {p['score']}/{p['max']}")
+    else:
+        lines.append("Priority areas: none scored weak enough to be a priority.")
+
     lines.append("\n=== FULL TRANSCRIPT ===")
     for m in transcript:
         speaker = "INTERVIEWER" if m.role == MessageRole.assistant else "CLIENT"
@@ -398,7 +488,7 @@ def _build_evidence_pack(state: dict[str, Any], transcript: list[Any]) -> str:
 
 # ───────────────────── Claude call ─────────────────────
 
-def _call_report_model(evidence_pack: str) -> dict[str, Any]:
+def _call_report_model(evidence_pack: str, tool: dict[str, Any] = REPORT_TOOL) -> dict[str, Any]:
     """One forced-tool call. Returns the submit_report tool input as a dict.
 
     Same failure contract as the chatbot: friendly HTTPException, specifics
@@ -413,7 +503,7 @@ def _call_report_model(evidence_pack: str) -> dict[str, Any]:
                 model=settings.claude_model,
                 max_tokens=settings.claude_report_max_tokens,
                 system=SYSTEM_PROMPT,
-                tools=[REPORT_TOOL],
+                tools=[tool],
                 tool_choice={"type": "tool", "name": "submit_report"},
                 messages=[{"role": "user", "content": evidence_pack}],
             )
@@ -447,12 +537,20 @@ def _call_report_model(evidence_pack: str) -> dict[str, Any]:
 
 
 
+# Emoji and pictographs: never in a report (the PDF fonts cannot draw them).
+_EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u27BF\uFE0F\u200D]")
+
+
 def _sanitize(value):
-    """Scrub typographic AI-tells from generated text, recursively."""
+    """Scrub typographic AI-tells from generated text, recursively: em and en
+    dashes, spaced hyphens used as dashes, curly quotes, and emoji."""
     if isinstance(value, str):
-        return (value.replace(" — ", ", ").replace("—", "-").replace("–", "-")
+        value = _EMOJI.sub("", value)
+        value = re.sub(r"\s+[\u2014\u2013]\s+|\s+-\s+(?=[A-Za-z])", ", ", value)
+        return (value.replace("\u2014", ", ").replace("\u2013", "-")
                      .replace("\u201c", '"').replace("\u201d", '"')
-                     .replace("\u2018", "'").replace("\u2019", "'"))
+                     .replace("\u2018", "'").replace("\u2019", "'")
+                     .replace(" ,", ",").replace(",,", ",").strip())
     if isinstance(value, list):
         return [_sanitize(v) for v in value]
     if isinstance(value, dict):
@@ -480,7 +578,9 @@ def _is_defaulted(area: dict[str, Any]) -> bool:
 
 
 def _scores_json(
-    state: dict[str, Any], summaries: dict[str, Any] | None = None
+    state: dict[str, Any],
+    summaries: dict[str, Any] | None = None,
+    finance_summaries: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Scan scores + a 0-100 aggregate so every legacy list/dashboard reader
     (which expects grow_overall/band) keeps working without changes.
@@ -511,7 +611,7 @@ def _scores_json(
         scored.append(score)
 
     aggregate = round(sum(scored) / len(scored) * 20, 1) if scored else 0.0
-    finance_out, health_pct = _finance_scores(state)
+    finance_out, health_pct = _finance_scores(state, finance_summaries)
     return {
         "report_type": REPORT_TYPE,
         "scan": scan_out,
@@ -527,7 +627,9 @@ def _scores_json(
     }
 
 
-def _finance_scores(state: dict[str, Any]) -> tuple[dict[str, Any], int | None]:
+def _finance_scores(
+    state: dict[str, Any], summaries: dict[str, Any] | None = None
+) -> tuple[dict[str, Any], int | None]:
     """Money Habits scores for the report. `rationale` is advisor-only and is
     stripped from client payloads in dashboard._report_payload. The health
     percentage is computed here in code, never by the model."""
@@ -542,13 +644,24 @@ def _finance_scores(state: dict[str, Any]) -> tuple[dict[str, Any], int | None]:
             "score": entry.get("score"),
             "unclear": bool(entry.get("unclear")),
             "followed_up": cat["key"] in (state.get("finance_followups") or []),
+            "summary": ((summaries or {}).get(cat["key"]) or "").strip()
+            or (entry.get("answer") or "").strip()
+            or "The client did not clearly address this during the interview.",
             "rationale": entry.get("rationale"),
         }
     pct = financial_health_pct({k: out[k]["score"] for k in FINANCE_KEYS})
     return out, pct
 
 
-def _content_json(state: dict[str, Any], analysis: dict[str, Any]) -> dict[str, Any]:
+def _first_sentences(text: str, limit: int) -> str:
+    """Keep the combined statement to its brief: at most `limit` sentences."""
+    parts = re.split(r"(?<=[.!?])\s+(?=[A-Z\"'])", text.strip())
+    return " ".join(parts[:limit]).strip()
+
+
+def _content_json(
+    state: dict[str, Any], analysis: dict[str, Any], priorities: list[dict[str, Any]] | None = None
+) -> dict[str, Any]:
     snap = state.get("snapshot", {})
     engagement_in = analysis.get("engagement") or {}
     eng_type = engagement_in.get("type")
@@ -558,6 +671,17 @@ def _content_json(state: dict[str, Any], analysis: dict[str, Any]) -> dict[str, 
         "report_type": REPORT_TYPE,
         # `summary` doubles as the card blurb in existing list UIs.
         "summary": analysis.get("headline") or "",
+        "combined": {
+            "headline": analysis.get("combined_headline") or analysis.get("headline") or "",
+            "body": _first_sentences(analysis.get("combined_body") or "", 3),
+        },
+        # Chosen in code (report_summary.priority_areas); the model only
+        # writes the first step for each.
+        "priorities": [
+            {**p, "first_step": ((analysis.get("priority_steps") or {}).get(p["key"]) or "").strip()
+             or p.get("recommendation") or "Agree the first step with MusperSolutions."}
+            for p in (priorities or [])
+        ],
         "snapshot": {
             "company_name": snap.get("company_name"),
             "sector": snap.get("sector"),
@@ -606,10 +730,15 @@ def generate_report(db: Session, session: DiagnosticSession) -> Report:
 
     transcript = sorted(session.messages, key=lambda m: m.created_at)
     evidence = _build_evidence_pack(state, transcript)
-    analysis = _sanitize(_call_report_model(evidence))
+    # Scores do not depend on the model, so priorities come from exactly
+    # what the report will store.
+    stored = _scores_json(state)
+    has_finance = bool(stored["finance"])
+    priorities = priority_areas(stored["scan"], stored["finance"])
+    analysis = _sanitize(_call_report_model(evidence, _report_tool(priorities, has_finance)))
 
-    scores = _scores_json(state, analysis.get("scan_summaries"))
-    content = _content_json(state, analysis)
+    scores = _scores_json(state, analysis.get("scan_summaries"), analysis.get("finance_summaries"))
+    content = _content_json(state, analysis, priorities)
 
     existing = db.scalar(
         select(Report)

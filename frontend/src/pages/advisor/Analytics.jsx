@@ -32,11 +32,42 @@ export default function Analytics() {
         description="Patterns across every diagnostic in the system, useful for spotting common gaps and tuning programs."
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <SummaryTile
+          label="Avg financial health"
+          value={data.average_financial_health !== null && data.average_financial_health !== undefined ? `${data.average_financial_health}%` : '-'}
+          detail={data.average_financial_health !== null && data.average_financial_health !== undefined
+            ? `${data.average_financial_health_band} ${data.average_financial_health_band_label} · ${data.financial_health_reports} report${data.financial_health_reports === 1 ? '' : 's'}`
+            : 'No reports with money habits yet'}
+        />
         <SummaryTile label="Completed sessions" value={data.total_completed} />
         <SummaryTile label="In progress" value={data.total_in_progress} accent />
         <SummaryTile label="Completion rate" value={`${data.completion_rate}%`} />
       </div>
+
+      {/* Money habits averages */}
+      <section className="rounded-3xl border border-musper-line bg-musper-cream-soft/70 p-6 sm:p-8">
+        <p className="eyebrow">Average score by money habit</p>
+        <h2 className="mt-3 font-display text-2xl tracking-editorial">Where clients' money habits are weakest.</h2>
+        <ul className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+          {(data.average_finance_scores || []).map((c) => (
+            <li key={c.key}>
+              <div className="flex items-baseline justify-between gap-3 text-sm">
+                <span className="text-musper-ink">{c.name}</span>
+                <span className="shrink-0 text-xs text-musper-muted">
+                  {c.average === null ? '-' : <><span className="font-display text-base italic text-musper-ink">{c.average}</span> / 3</>}
+                </span>
+              </div>
+              <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-musper-line">
+                {c.average !== null && (
+                  <div className={`h-full ${c.average < 1.5 ? 'bg-musper-orange' : 'bg-musper-green'}`}
+                       style={{ width: `${(c.average / 3) * 100}%` }} />
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {/* Domain averages */}
       <section className="rounded-3xl border border-musper-line bg-musper-cream-soft/70 p-6 sm:p-8">
@@ -117,7 +148,7 @@ export default function Analytics() {
   );
 }
 
-function SummaryTile({ label, value, accent }) {
+function SummaryTile({ label, value, accent, detail }) {
   return (
     <div className="rounded-2xl border border-musper-line bg-musper-cream-soft p-5">
       <p className="text-xs uppercase tracking-eyebrow text-musper-muted">{label}</p>
@@ -127,6 +158,7 @@ function SummaryTile({ label, value, accent }) {
       ].join(' ')}>
         {value}
       </p>
+      {detail && <p className="mt-3 text-xs text-musper-muted">{detail}</p>}
     </div>
   );
 }

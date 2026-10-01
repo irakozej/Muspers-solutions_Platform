@@ -19,6 +19,19 @@ FINANCE_READINESS_WEIGHTS: dict[str, float] = {
 }
 
 
+# Root-cause report bands (0-100 scale). The single place to rename them.
+BAND_LABELS: dict[str, str] = {
+    "A": "Strong footing",     # 80 and above
+    "B": "Building",           # 60 to 79
+    "C": "Foundations first",  # below 60
+}
+NOT_ASSESSED = "Not assessed"
+
+
+def band_label(band: str | None) -> str:
+    return BAND_LABELS.get(band or "", NOT_ASSESSED)
+
+
 def band_for(score: float | int | None) -> str:
     if score is None:
         return "-"

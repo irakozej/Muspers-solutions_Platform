@@ -178,6 +178,7 @@ def test_report_receives_finance_scores_and_health_pct(monkeypatch):
     assert scores["finance"]["debt"] == {
         "name": "Debt and Financing", "score": 1, "unclear": False,
         "followed_up": True, "rationale": "PRIVATE debt",
+        "summary": "debt answer",  # model gave no summary: falls back to the recorded answer
     }
 
     client_view = dash._report_payload(report, session_id=sid)

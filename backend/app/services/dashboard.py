@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.core.scoring import band_for
+from app.core.scoring import band_for, band_label
 from app.models.advisor_note import AdvisorNote
 from app.models.chat_message import ChatMessage
 from app.models.client import Client
@@ -16,6 +16,8 @@ from app.models.diagnostic_session import DiagnosticSession, SessionStatus
 from app.models.rating import Rating
 from app.models.report import Report
 from app.models.user import User
+from app.services import report_summary
+from app.services.finance_framework import FINANCE_CATEGORIES
 
 
 def _now() -> datetime:
@@ -164,6 +166,7 @@ def list_clients(
                 "overall_score": float(scores["grow_overall"]) if scores else None,
                 "band": band_for(scores["grow_overall"]) if scores else None,
                 "finance_readiness": float(scores["finance_readiness"]) if scores else None,
+                **_financial_health_columns(scores),
                 "last_activity": (latest_session.completed_at or latest_session.started_at)
                 if latest_session
                 else c.created_at,
@@ -173,6 +176,16 @@ def list_clients(
             }
         )
     return out
+
+
+def _financial_health_columns(scores: dict | None) -> dict:
+    pct = (scores or {}).get("financial_health_pct")
+    band = band_for(pct) if pct is not None else None
+    return {
+        "financial_health_pct": pct,
+        "financial_health_band": band,
+        "financial_health_band_label": band_label(band),
+    }
 
 
 # ───────────────────── advisor: single client detail ─────────────────────
@@ -298,6 +311,12 @@ def _report_payload(
         payload["scan_results"] = scan
         payload["finance_results"] = finance
         payload["financial_health_pct"] = scores.get("financial_health_pct")
+        summary = report_summary.build_summary(scores, content)
+        payload["summary_cover"] = summary
+        payload["money_habits"] = report_summary.finance_rows(finance)
+        payload["financial_health_row"] = report_summary.financial_health_row(summary["financial_health"])
+        payload["priorities"] = content.get("priorities") or []
+        payload["next_steps"] = report_summary.NEXT_STEPS
         payload["snapshot"] = content.get("snapshot") or {}
         payload["diagnosis"] = content.get("diagnosis") or {}
         payload["service_pathway"] = content.get("service_pathway") or []
@@ -316,10 +335,18 @@ def collect_analytics(db: Session) -> dict:
     domain_totals = {d: 0.0 for d in DOMAINS}
     domain_counts = {d: 0 for d in DOMAINS}
     red_flags_counter: Counter = Counter()
+    health_values: list[int] = []
+    finance_totals = {c["key"]: [0, 0] for c in FINANCE_CATEGORIES}  # [sum, count]
 
     for r in reports:
         scores = r.scores_json or {}
         content = r.content_json or {}
+        if scores.get("financial_health_pct") is not None:
+            health_values.append(int(scores["financial_health_pct"]))
+        for key, entry in (scores.get("finance") or {}).items():
+            if key in finance_totals and (entry or {}).get("score") is not None:
+                finance_totals[key][0] += int(entry["score"])
+                finance_totals[key][1] += 1
         for d in DOMAINS:
             if d in scores:
                 domain_totals[d] += float(scores[d])
@@ -359,7 +386,21 @@ def collect_analytics(db: Session) -> dict:
     )
     completion_rate = round(total_completed / total_sessions * 100, 1) if total_sessions else 0.0
 
+    average_health = round(sum(health_values) / len(health_values)) if health_values else None
     return {
+        "average_financial_health": average_health,
+        "average_financial_health_band": band_for(average_health) if average_health is not None else None,
+        "average_financial_health_band_label": band_label(band_for(average_health)) if average_health is not None else band_label(None),
+        "financial_health_reports": len(health_values),
+        "average_finance_scores": [
+            {
+                "key": c["key"],
+                "name": c["name"],
+                "average": round(finance_totals[c["key"]][0] / finance_totals[c["key"]][1], 1)
+                if finance_totals[c["key"]][1] else None,
+            }
+            for c in FINANCE_CATEGORIES
+        ],
         "average_domain_scores": average_domain_scores,
         "top_red_flags": top_red_flags,
         "sector_distribution": sector_distribution,

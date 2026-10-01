@@ -90,6 +90,12 @@ class ReportPayload(BaseModel):
     # Money Habits (empty / None on reports from before the stage existed)
     finance_results: dict[str, Any] | None = None
     financial_health_pct: int | None = None
+    # Summary-first layout (computed in code at read time, see report_summary)
+    summary_cover: dict[str, Any] | None = None
+    money_habits: list[dict[str, Any]] | None = None
+    financial_health_row: dict[str, Any] | None = None
+    priorities: list[dict[str, Any]] | None = None
+    next_steps: list[dict[str, Any]] | None = None
     snapshot: dict[str, Any] | None = None
     diagnosis: dict[str, Any] | None = None
     service_pathway: list[dict[str, Any]] | None = None
@@ -118,6 +124,9 @@ class ClientSummary(BaseModel):
     overall_score: float | None
     band: str | None
     finance_readiness: float | None
+    financial_health_pct: int | None = None
+    financial_health_band: str | None = None
+    financial_health_band_label: str | None = None
     last_activity: datetime | None
     session_status: str | None
     is_shared: bool
@@ -156,6 +165,11 @@ class ClientDetail(BaseModel):
 
 
 class AnalyticsResponse(BaseModel):
+    average_financial_health: int | None = None
+    average_financial_health_band: str | None = None
+    average_financial_health_band_label: str | None = None
+    financial_health_reports: int = 0
+    average_finance_scores: list[dict[str, Any]] = []  # [{key, name, average}]
     average_domain_scores: dict[str, float]
     top_red_flags: list[dict[str, Any]]  # [{label, count}]
     sector_distribution: list[dict[str, Any]]  # [{sector, count}]

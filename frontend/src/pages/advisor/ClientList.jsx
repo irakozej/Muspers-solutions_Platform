@@ -72,8 +72,9 @@ export default function ClientList() {
       {/* Table */}
       <div className="overflow-hidden rounded-3xl border border-musper-line bg-musper-cream-soft/70">
         <div className="hidden grid-cols-12 border-b border-musper-line bg-white px-6 py-3 text-xs font-medium uppercase tracking-eyebrow text-musper-muted lg:grid">
-          <div className="col-span-4">Business</div>
+          <div className="col-span-3">Business</div>
           <div className="col-span-2">Sector</div>
+          <div className="col-span-1 text-right">Financial health</div>
           <div className="col-span-1 text-right">Score</div>
           <div className="col-span-1 text-center">Band</div>
           <div className="col-span-2">Last activity</div>
@@ -92,13 +93,24 @@ export default function ClientList() {
                 to={`/advisor/clients/${c.id}`}
                 className="group grid grid-cols-1 gap-4 px-6 py-5 transition-colors duration-200 hover:bg-musper-cream-soft lg:grid-cols-12 lg:items-center lg:gap-2"
               >
-                <div className="lg:col-span-4">
+                <div className="lg:col-span-3">
                   <p className="font-display text-lg leading-tight tracking-editorial">
                     {c.business_name}
                   </p>
                   <p className="mt-0.5 text-xs text-musper-muted">{c.location || '-'}</p>
                 </div>
                 <div className="text-sm text-musper-ink/80 lg:col-span-2">{c.sector || '-'}</div>
+                <div className="lg:col-span-1 lg:text-right" title={c.financial_health_band_label || 'Not assessed'}>
+                  {c.financial_health_pct !== null && c.financial_health_pct !== undefined ? (
+                    <span className="inline-flex items-baseline gap-1.5">
+                      <span className="text-xs text-musper-muted lg:hidden">Financial health</span>
+                      <span className="font-display text-lg font-medium italic text-musper-green">{c.financial_health_pct}</span>
+                      <ScoreBand band={c.financial_health_band} size="sm" />
+                    </span>
+                  ) : (
+                    <span className="text-xs text-musper-muted-soft">Not assessed</span>
+                  )}
+                </div>
                 <div className="lg:col-span-1 lg:text-right">
                   <span className="font-display text-lg font-medium italic text-musper-green">
                     {c.overall_score ? Math.round(c.overall_score) : '-'}
