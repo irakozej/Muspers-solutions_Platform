@@ -2,16 +2,14 @@
 # Apply via Render Dashboard → Blueprints → New Blueprint Instance, or create
 # the three services manually with the same settings.
 #
+# Database: Neon Postgres (free tier), not a Render database. Create the
+# project at https://neon.tech and paste its connection string into the
+# DATABASE_URL secret on musper-api.
+#
 # Architecture: the static site proxies /api/* and /health to the backend via
 # rewrite rules, so the browser sees a single origin. That keeps the HTTP-only
 # refresh cookie (SameSite=Lax) and the CSRF double-submit cookie working
 # exactly as they do behind the Vite dev proxy. No CORS or cookie changes needed.
-
-databases:
-  - name: musper-db
-    plan: free
-    databaseName: musper
-    user: musper
 
 services:
   # ── Backend API (FastAPI) ────────────────────────────────────────────
@@ -31,9 +29,7 @@ services:
       - key: APP_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: musper-db
-          property: connectionString
+        sync: false # secret: Neon connection string, paste in the dashboard, never in this file
       - key: JWT_SECRET
         generateValue: true
       - key: COOKIE_SECURE

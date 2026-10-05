@@ -15,8 +15,10 @@ class Settings(BaseSettings):
     @field_validator("database_url")
     @classmethod
     def _normalize_database_url(cls, v: str) -> str:
-        # Managed hosts (Render, Heroku) hand out postgres:// or postgresql://
-        # URLs; SQLAlchemy needs the psycopg3 driver spelled out.
+        # Managed hosts (Neon, Render, Heroku) hand out postgres:// or
+        # postgresql:// URLs; SQLAlchemy needs the psycopg3 driver spelled out.
+        # Only the scheme changes, so query options such as Neon's
+        # ?sslmode=require pass straight through to the driver.
         if v.startswith("postgres://"):
             return v.replace("postgres://", "postgresql+psycopg://", 1)
         if v.startswith("postgresql://"):

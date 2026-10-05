@@ -8,7 +8,9 @@ from app.db.base import Base
 from app import models  # noqa: F401  (ensure models are imported so metadata is populated)
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Escape % for ConfigParser interpolation: a URL-encoded password (for example
+# "%40" for "@") would otherwise crash every migration at boot.
+config.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
