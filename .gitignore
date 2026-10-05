@@ -32,3 +32,6 @@ npm-debug.log*
 .pgdata/
 .demo-logs/
 private-reference/
+
+# --- Live smoke-test output (transcripts, PDFs, results; never commit) ---
+smoke-results/
