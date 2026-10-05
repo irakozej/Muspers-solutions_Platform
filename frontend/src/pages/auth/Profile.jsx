@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, User as UserIcon, CheckCircle2, AlertCircle, LogOut } from 'lucide-react';
 import FormField from '../../components/FormField';
+import PasswordInput from '../../components/PasswordInput';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../services/auth';
 
@@ -121,18 +122,16 @@ export default function Profile() {
         {/* PASSWORD FORM */}
         <Card title="Change password" eyebrow="Security">
           <form onSubmit={onChangePassword} className="space-y-5">
-            <FormField
+            <PasswordInput
               label="Current password"
-              type="password"
               name="current_password"
               value={pwForm.current_password}
               onChange={(e) => setPwForm((f) => ({ ...f, current_password: e.target.value }))}
               autoComplete="current-password"
               required
             />
-            <FormField
+            <PasswordInput
               label="New password"
-              type="password"
               name="new_password"
               value={pwForm.new_password}
               onChange={(e) => setPwForm((f) => ({ ...f, new_password: e.target.value }))}

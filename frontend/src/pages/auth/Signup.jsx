@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import AuthShell from '../../components/AuthShell';
 import FormField from '../../components/FormField';
+import PasswordInput from '../../components/PasswordInput';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Signup() {
@@ -10,6 +11,8 @@ export default function Signup() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ full_name: '', email: '', password: '' });
+  // Kept apart from `form` on purpose: only `form` is ever sent to the server.
+  const [confirm, setConfirm] = useState('');
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
 
@@ -24,6 +27,12 @@ export default function Signup() {
       setError('Password must be at least 8 characters.');
       return;
     }
+    if (form.password !== confirm) {
+      // The inline message under the field already says so; just take the
+      // person there instead of repeating it in a banner that would go stale.
+      e.currentTarget.elements.confirm_password?.focus();
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -35,6 +44,9 @@ export default function Signup() {
       setBusy(false);
     }
   };
+
+  // Only flag a mismatch once the person has started typing the confirmation.
+  const mismatch = confirm.length > 0 && confirm !== form.password;
 
   return (
     <AuthShell
@@ -69,15 +81,23 @@ export default function Signup() {
           autoComplete="email"
           required
         />
-        <FormField
+        <PasswordInput
           label="Password"
-          type="password"
           name="password"
           value={form.password}
           onChange={onChange}
           autoComplete="new-password"
           required
           hint="min. 8 characters"
+        />
+        <PasswordInput
+          label="Confirm password"
+          name="confirm_password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          autoComplete="new-password"
+          required
+          error={mismatch ? 'Passwords do not match.' : null}
         />
 
         <div className="flex items-start gap-2 text-xs text-musper-muted">

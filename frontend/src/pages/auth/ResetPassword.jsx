@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import AuthShell from '../../components/AuthShell';
 import FormField from '../../components/FormField';
+import PasswordInput from '../../components/PasswordInput';
 import { authApi } from '../../services/auth';
 
 export default function ResetPassword() {
@@ -56,9 +57,8 @@ export default function ResetPassword() {
           hint="Auto-filled from the reset link"
           required
         />
-        <FormField
+        <PasswordInput
           label="New password"
-          type="password"
           name="password"
           value={form.password}
           onChange={onChange}

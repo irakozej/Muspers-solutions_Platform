@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
 import AuthShell from '../../components/AuthShell';
 import FormField from '../../components/FormField';
+import PasswordInput from '../../components/PasswordInput';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
@@ -59,9 +60,8 @@ export default function Login() {
           autoComplete="email"
           required
         />
-        <FormField
+        <PasswordInput
           label="Password"
-          type="password"
           name="password"
           value={form.password}
           onChange={onChange}
